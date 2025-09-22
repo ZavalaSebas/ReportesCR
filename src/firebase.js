@@ -3,16 +3,17 @@ import { initializeApp } from "firebase/app";
 import { getAnalytics } from "firebase/analytics";
 import { getFirestore, collection, addDoc, onSnapshot, doc, updateDoc, increment, query, orderBy, where, getDoc } from "firebase/firestore";
 import { getAuth, GoogleAuthProvider, signInWithPopup, signOut } from "firebase/auth";
+// import { debugFirebase } from "./debug.js"; // Commented out for production
 
 // Your web app's Firebase configuration
 const firebaseConfig = {
-  apiKey: "AIzaSyDiKKNFp9GHOj0pl6tqtzJBdLByWGilziY",
-  authDomain: "reportes-cr.firebaseapp.com",
-  projectId: "reportes-cr",
-  storageBucket: "reportes-cr.firebasestorage.app",
-  messagingSenderId: "726563480511",
-  appId: "1:726563480511:web:c9acda60503611926af70a",
-  measurementId: "G-M7SN1PGPS3"
+  apiKey: import.meta.env.VITE_FIREBASE_API_KEY || "AIzaSyDiKKNFp9GHOj0pl6tqtzJBdLByWGilziY",
+  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN || "reportes-cr.firebaseapp.com",
+  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID || "reportes-cr",
+  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET || "reportes-cr.firebasestorage.app",
+  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID || "726563480511",
+  appId: import.meta.env.VITE_FIREBASE_APP_ID || "1:726563480511:web:c9acda60503611926af70a",
+  measurementId: import.meta.env.VITE_FIREBASE_MEASUREMENT_ID || "G-M7SN1PGPS3"
 };
 
 // Initialize Firebase
@@ -45,13 +46,9 @@ export const logout = async () => {
 // Firestore functions for reports
 export const createReport = async (reportData) => {
   try {
-    const docRef = await addDoc(collection(db, "reports"), {
-      ...reportData,
-      createdAt: new Date(),
-      confirmations: 0,
-      confirmed_by: []
-    });
-    console.log("Report created with ID: ", docRef.id);
+    console.log("Creating report with data:", reportData);
+    const docRef = await addDoc(collection(db, "reports"), reportData);
+    console.log("Report created with ID:", docRef.id);
     return docRef.id;
   } catch (error) {
     console.error("Error creating report:", error);
@@ -65,25 +62,58 @@ export const subscribeToReports = (callback) => {
     orderBy("createdAt", "desc")
   );
   
-  return onSnapshot(q, (querySnapshot) => {
-    const reports = [];
-    querySnapshot.forEach((doc) => {
-      reports.push({
-        id: doc.id,
-        ...doc.data()
+  return onSnapshot(q, 
+    (querySnapshot) => {
+      const reports = [];
+      querySnapshot.forEach((doc) => {
+        const data = doc.data();
+        // Convert Firestore timestamp to JavaScript Date
+        const processedData = {
+          ...data,
+          createdAt: data.createdAt?.toDate ? data.createdAt.toDate() : data.createdAt
+        };
+        
+        reports.push({
+          id: doc.id,
+          ...processedData
+        });
       });
-    });
-    callback(reports);
-  });
+      console.log("Reports loaded:", reports.length);
+      callback(reports);
+    },
+    (error) => {
+      console.error("Error listening to reports:", error);
+      // Return empty array on error
+      callback([]);
+    }
+  );
 };
 
 export const confirmReport = async (reportId, userId) => {
   try {
     const reportRef = doc(db, "reports", reportId);
+    // Get the current document first
+    const reportDoc = await getDoc(reportRef);
+    
+    if (!reportDoc.exists()) {
+      throw new Error("Report not found");
+    }
+    
+    const reportData = reportDoc.data();
+    const confirmedBy = reportData.confirmed_by || [];
+    
+    // Check if user already confirmed
+    if (confirmedBy.includes(userId)) {
+      throw new Error("You have already confirmed this report");
+    }
+    
+    // Update the document
     await updateDoc(reportRef, {
       confirmations: increment(1),
-      confirmed_by: [...(await getDoc(reportRef)).data().confirmed_by || [], userId]
+      confirmed_by: [...confirmedBy, userId]
     });
+    
+    console.log("Report confirmed successfully");
   } catch (error) {
     console.error("Error confirming report:", error);
     throw error;

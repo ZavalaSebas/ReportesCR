@@ -41,6 +41,15 @@ const MapView = ({ reports, userLocation }) => {
   // Default center to Costa Rica coordinates
   const center = userLocation || [9.7489, -83.7534];
 
+  // Don't render if we don't have proper coordinates
+  if (!center || !Array.isArray(center) || center.length !== 2) {
+    return (
+      <div className="w-full h-64 md:h-96 lg:h-[500px] rounded-lg overflow-hidden shadow-lg bg-gray-200 flex items-center justify-center">
+        <p className="text-gray-600">Cargando mapa...</p>
+      </div>
+    );
+  }
+
   return (
     <div className="w-full h-64 md:h-96 lg:h-[500px] rounded-lg overflow-hidden shadow-lg">
       <MapContainer
@@ -54,7 +63,7 @@ const MapView = ({ reports, userLocation }) => {
         />
         
         {/* User location marker */}
-        {userLocation && (
+        {userLocation && Array.isArray(userLocation) && userLocation.length === 2 && (
           <Marker position={userLocation}>
             <Popup>
               <div className="text-center">
@@ -65,44 +74,53 @@ const MapView = ({ reports, userLocation }) => {
         )}
 
         {/* Report markers */}
-        {reports.map((report) => (
-          <Marker
-            key={report.id}
-            position={[report.latitude, report.longitude]}
-            icon={serviceIcons[report.serviceType] || serviceIcons.otros}
-          >
-            <Popup>
-              <div className="p-2 max-w-xs">
-                <div className="flex items-center mb-2">
-                  <span className={`font-bold text-lg ${serviceColors[report.serviceType]} capitalize`}>
-                    {report.serviceType}
-                  </span>
-                </div>
-                
-                <div className="space-y-1 text-sm">
-                  <div>
-                    <strong>Proveedor:</strong> {report.provider}
+        {reports && Array.isArray(reports) && reports.map((report) => {
+          // Validate report has required location data
+          if (!report.latitude || !report.longitude || 
+              typeof report.latitude !== 'number' || 
+              typeof report.longitude !== 'number') {
+            return null;
+          }
+          
+          return (
+            <Marker
+              key={report.id}
+              position={[report.latitude, report.longitude]}
+              icon={serviceIcons[report.serviceType] || serviceIcons.otros}
+            >
+              <Popup>
+                <div className="p-2 max-w-xs">
+                  <div className="flex items-center mb-2">
+                    <span className={`font-bold text-lg ${serviceColors[report.serviceType]} capitalize`}>
+                      {report.serviceType}
+                    </span>
                   </div>
                   
-                  {report.description && (
+                  <div className="space-y-1 text-sm">
                     <div>
-                      <strong>Descripción:</strong> {report.description}
+                      <strong>Proveedor:</strong> {report.provider}
                     </div>
-                  )}
-                  
-                  <div className="flex items-center justify-between pt-2 border-t">
-                    <span className="text-gray-600">
-                      {report.confirmations} confirmación{report.confirmations !== 1 ? 'es' : ''}
-                    </span>
-                    <span className="text-xs text-gray-500">
-                      {new Date(report.createdAt?.toDate?.() || report.createdAt).toLocaleDateString()}
-                    </span>
+                    
+                    {report.description && (
+                      <div>
+                        <strong>Descripción:</strong> {report.description}
+                      </div>
+                    )}
+                    
+                    <div className="flex items-center justify-between pt-2 border-t">
+                      <span className="text-gray-600">
+                        {report.confirmations || 0} confirmación{(report.confirmations || 0) !== 1 ? 'es' : ''}
+                      </span>
+                      <span className="text-xs text-gray-500">
+                        {new Date(report.createdAt?.toDate?.() || report.createdAt).toLocaleDateString()}
+                      </span>
+                    </div>
                   </div>
                 </div>
-              </div>
-            </Popup>
-          </Marker>
-        ))}
+              </Popup>
+            </Marker>
+          );
+        })}
       </MapContainer>
     </div>
   );

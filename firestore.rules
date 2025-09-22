@@ -2,8 +2,22 @@ rules_version = '2';
 
 service cloud.firestore {
   match /databases/{database}/documents {
-    match /{document=**} {
-      allow read, write: if false;
+    // Reports collection rules - More secure but functional
+    match /reports/{reportId} {
+      // Allow read access to all authenticated users
+      allow read: if request.auth != null;
+      
+      // Allow create access to authenticated users with proper data structure
+      allow create: if request.auth != null 
+        && request.auth.uid != null
+        && request.resource.data.userId == request.auth.uid
+        && request.resource.data.keys().hasAll(['title', 'serviceType', 'provider', 'description', 'location', 'userId', 'userEmail', 'createdAt', 'confirmations', 'confirmed_by']);
+      
+      // Allow update only for confirmations (prevent abuse)
+      allow update: if request.auth != null 
+        && request.auth.uid != null
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['confirmations', 'confirmed_by'])
+        && request.resource.data.confirmations == resource.data.confirmations + 1;
     }
   }
 }

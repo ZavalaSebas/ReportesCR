@@ -17,6 +17,7 @@ const providers = {
 
 const ReportForm = ({ user, onReportCreated }) => {
   const [formData, setFormData] = useState({
+    title: '',
     serviceType: '',
     provider: '',
     description: ''
@@ -24,6 +25,7 @@ const ReportForm = ({ user, onReportCreated }) => {
   const [userLocation, setUserLocation] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [success, setSuccess] = useState('');
 
   useEffect(() => {
     // Get user location
@@ -36,12 +38,27 @@ const ReportForm = ({ user, onReportCreated }) => {
           });
         },
         (error) => {
-          console.error("Error getting location:", error);
-          setError('No se pudo obtener tu ubicación. Por favor permite el acceso a la geolocalización.');
+          console.warn("No se pudo obtener la ubicación:", error.message);
+          // Set default location to San José, Costa Rica
+          setUserLocation({
+            latitude: 9.9281,
+            longitude: -84.0907
+          });
+          setError('Usando ubicación por defecto (San José). Puedes permitir la geolocalización para mayor precisión.');
+        },
+        {
+          enableHighAccuracy: true,
+          timeout: 10000,
+          maximumAge: 300000
         }
       );
     } else {
-      setError('Tu navegador no soporta geolocalización.');
+      console.warn("Geolocalización no soportada");
+      setUserLocation({
+        latitude: 9.9281,
+        longitude: -84.0907
+      });
+      setError('Geolocalización no soportada. Usando ubicación por defecto (San José).');
     }
   }, []);
 
@@ -78,28 +95,47 @@ const ReportForm = ({ user, onReportCreated }) => {
 
     try {
       const reportData = {
-        ...formData,
-        ...userLocation,
+        title: formData.title || `${formData.serviceType} - ${formData.provider}`,
+        serviceType: formData.serviceType,
+        provider: formData.provider,
+        description: formData.description || '',
+        location: {
+          latitude: userLocation.latitude,
+          longitude: userLocation.longitude
+        },
         userId: user.uid,
         userEmail: user.email,
-        userName: user.displayName || user.email
+        userName: user.displayName || user.email,
+        createdAt: new Date(),
+        confirmations: 0,
+        confirmed_by: []
       };
 
+      console.log('Creating report with data:', reportData);
       await createReport(reportData);
       
       // Reset form
       setFormData({
+        title: '',
         serviceType: '',
         provider: '',
         description: ''
       });
+
+      // Clear any previous errors and show success message
+      setError('');
+      setSuccess('¡Reporte creado exitosamente! 🎉');
 
       // Notify parent component
       if (onReportCreated) {
         onReportCreated();
       }
 
-      alert('¡Reporte creado exitosamente!');
+      // Clear success message after 3 seconds
+      setTimeout(() => {
+        setSuccess('');
+      }, 3000);
+
     } catch (error) {
       console.error('Error creating report:', error);
       setError('Error al crear el reporte. Intenta nuevamente.');
@@ -127,7 +163,30 @@ const ReportForm = ({ user, onReportCreated }) => {
         </div>
       )}
 
+      {success && (
+        <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-4">
+          {success}
+        </div>
+      )}
+
       <form onSubmit={handleSubmit} className="space-y-4">
+        {/* Title */}
+        <div>
+          <label htmlFor="title" className="block text-sm font-medium text-gray-700 mb-1">
+            Título del Reporte
+          </label>
+          <input
+            type="text"
+            id="title"
+            name="title"
+            value={formData.title}
+            onChange={handleInputChange}
+            placeholder="Ej: Corte de luz en San José Centro"
+            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+          />
+          <p className="text-xs text-gray-500 mt-1">Opcional - se generará automáticamente si no se especifica</p>
+        </div>
+
         {/* Service Type */}
         <div>
           <label htmlFor="serviceType" className="block text-sm font-medium text-gray-700 mb-1">
