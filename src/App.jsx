@@ -207,8 +207,8 @@ function App() {
 
   console.log('App: Rendering main application state');
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-gray-100">
-      <header className="bg-gradient-to-r from-blue-600 to-blue-700 shadow-lg">
+    <div className="min-h-screen bg-gradient-to-br from-red-50 to-gray-100">
+      <header className="bg-gradient-to-r from-red-600 to-red-700 shadow-lg">
         <div className="w-full px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center py-6">
             <div className="flex items-center">
@@ -216,13 +216,22 @@ function App() {
                 Reportes CR 🇨🇷
               </h1>
               <span className="ml-4 px-3 py-1 bg-white bg-opacity-20 text-white text-sm rounded-full">
-                Debug
+                v1.0
               </span>
             </div>
             <div className="flex items-center space-x-4">
-              <span className="text-blue-100">
-                {user.displayName || user.email}
-              </span>
+              <div className="flex items-center space-x-2">
+                {user.photoURL && (
+                  <img 
+                    src={user.photoURL} 
+                    alt="Foto de perfil"
+                    className="w-8 h-8 rounded-full border-2 border-white border-opacity-30"
+                  />
+                )}
+                <span className="text-red-100">
+                  {user.displayName || user.email}
+                </span>
+              </div>
               <button
                 onClick={handleLogout}
                 className="bg-white bg-opacity-20 text-white py-2 px-4 rounded-md hover:bg-opacity-30 transition duration-200"
@@ -235,10 +244,6 @@ function App() {
       </header>
 
       <div className="w-full px-6 sm:px-8 lg:px-12 py-8">
-        <p className="text-center text-sm text-gray-500 mb-6">
-          ¡Aplicación completa restaurada! 🎉
-        </p>
-        
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
           
           {/* Main Content - 3 columns */}
@@ -257,7 +262,7 @@ function App() {
                     onClick={() => setActiveTab(tab.key)}
                     className={`flex-1 flex items-center justify-center py-3 text-sm font-medium ${
                       activeTab === tab.key
-                        ? 'text-blue-600 border-b-2 border-blue-600'
+                        ? 'text-red-600 border-b-2 border-red-600'
                         : 'text-gray-500 hover:text-gray-700'
                     }`}
                   >
@@ -316,9 +321,9 @@ function App() {
                 Estado del Sistema
               </h3>
               <div className="space-y-4">
-                <div className="bg-blue-50 p-3 rounded-lg flex justify-between items-center">
+                <div className="bg-red-50 p-3 rounded-lg flex justify-between items-center">
                   <span className="text-gray-700 font-medium">Total reportes:</span>
-                  <span className="text-blue-600 font-bold text-lg">{reports.length}</span>
+                  <span className="text-red-600 font-bold text-lg">{reports.length}</span>
                 </div>
                 <div className="bg-green-50 p-3 rounded-lg flex justify-between items-center">
                   <span className="text-gray-700 font-medium">Tu ubicación:</span>

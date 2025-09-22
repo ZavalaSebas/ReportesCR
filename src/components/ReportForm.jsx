@@ -64,12 +64,22 @@ const ReportForm = ({ user, onReportCreated }) => {
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: value,
-      // Reset provider when service type changes
-      ...(name === 'serviceType' && { provider: '' })
-    }));
+    setFormData(prev => {
+      const newData = {
+        ...prev,
+        [name]: value,
+        // Reset provider when service type changes
+        ...(name === 'serviceType' && { provider: '' })
+      };
+      
+      // Auto-generate title based on service type if title is empty
+      if (name === 'serviceType' && value && !prev.title.trim()) {
+        const serviceLabel = serviceTypes.find(s => s.value === value)?.label || value;
+        newData.title = `Corte de ${serviceLabel}`;
+      }
+      
+      return newData;
+    });
   };
 
   const handleSubmit = async (e) => {
