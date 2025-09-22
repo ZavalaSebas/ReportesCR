@@ -67,11 +67,18 @@ export const subscribeToReports = (callback) => {
       const reports = [];
       querySnapshot.forEach((doc) => {
         const data = doc.data();
+        console.log('Raw report data from Firestore:', data);
+        
         // Convert Firestore timestamp to JavaScript Date
         const processedData = {
           ...data,
-          createdAt: data.createdAt?.toDate ? data.createdAt.toDate() : data.createdAt
+          createdAt: data.createdAt?.toDate ? data.createdAt.toDate() : data.createdAt,
+          // Ensure coordinates are at root level for backward compatibility
+          latitude: data.latitude || data.location?.latitude,
+          longitude: data.longitude || data.location?.longitude
         };
+        
+        console.log('Processed report data:', processedData);
         
         reports.push({
           id: doc.id,

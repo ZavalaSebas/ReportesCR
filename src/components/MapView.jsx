@@ -1,5 +1,5 @@
 import React from 'react';
-import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
+import { MapContainer, TileLayer, Marker, Popup, Circle } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 
@@ -35,6 +35,38 @@ const serviceColors = {
   agua: 'text-blue-600', 
   internet: 'text-green-600',
   otros: 'text-orange-600'
+};
+
+// Circle colors and styles for each service type
+const circleStyles = {
+  luz: {
+    color: '#dc2626', // red-600
+    fillColor: '#dc2626',
+    fillOpacity: 0.3, // More visible
+    weight: 3,
+    radius: 800 // Larger for testing
+  },
+  agua: {
+    color: '#2563eb', // blue-600
+    fillColor: '#2563eb',
+    fillOpacity: 0.3,
+    weight: 3,
+    radius: 800
+  },
+  internet: {
+    color: '#16a34a', // green-600
+    fillColor: '#16a34a',
+    fillOpacity: 0.3,
+    weight: 3,
+    radius: 800
+  },
+  otros: {
+    color: '#ea580c', // orange-600
+    fillColor: '#ea580c',
+    fillOpacity: 0.3,
+    weight: 3,
+    radius: 800
+  }
 };
 
 const MapView = ({ reports, userLocation }) => {
@@ -73,52 +105,98 @@ const MapView = ({ reports, userLocation }) => {
           </Marker>
         )}
 
-        {/* Report markers */}
+        {/* Report markers and circles */}
         {reports && Array.isArray(reports) && reports.map((report) => {
-          // Validate report has required location data
-          if (!report.latitude || !report.longitude || 
-              typeof report.latitude !== 'number' || 
-              typeof report.longitude !== 'number') {
+          console.log('Processing report for map:', {
+            id: report.id,
+            lat: report.latitude,
+            lng: report.longitude,
+            location: report.location,
+            serviceType: report.serviceType
+          });
+          
+          // Try different ways to get coordinates
+          let latitude, longitude;
+          
+          if (report.latitude && report.longitude) {
+            latitude = report.latitude;
+            longitude = report.longitude;
+          } else if (report.location && report.location.latitude && report.location.longitude) {
+            latitude = report.location.latitude;
+            longitude = report.location.longitude;
+          } else {
+            console.warn('Report missing coordinates:', report);
             return null;
           }
           
+          // Validate coordinates are numbers
+          if (typeof latitude !== 'number' || typeof longitude !== 'number') {
+            console.warn('Invalid coordinates for report:', report.id, latitude, longitude);
+            return null;
+          }
+          
+          const position = [latitude, longitude];
+          const circleStyle = circleStyles[report.serviceType] || circleStyles.otros;
+          
+          console.log('Rendering circle and marker at:', position, 'with style:', circleStyle);
+          
           return (
-            <Marker
-              key={report.id}
-              position={[report.latitude, report.longitude]}
-              icon={serviceIcons[report.serviceType] || serviceIcons.otros}
-            >
-              <Popup>
-                <div className="p-2 max-w-xs">
-                  <div className="flex items-center mb-2">
-                    <span className={`font-bold text-lg ${serviceColors[report.serviceType]} capitalize`}>
-                      {report.serviceType}
-                    </span>
-                  </div>
-                  
-                  <div className="space-y-1 text-sm">
-                    <div>
-                      <strong>Proveedor:</strong> {report.provider}
+            <React.Fragment key={report.id}>
+              {/* Affected area circle */}
+              <Circle
+                center={position}
+                radius={circleStyle.radius}
+                pathOptions={{
+                  color: circleStyle.color,
+                  fillColor: circleStyle.fillColor,
+                  fillOpacity: circleStyle.fillOpacity,
+                  weight: circleStyle.weight
+                }}
+              />
+              
+              {/* Report marker */}
+              <Marker
+                position={position}
+                icon={serviceIcons[report.serviceType] || serviceIcons.otros}
+              >
+                <Popup>
+                  <div className="p-2 max-w-xs">
+                    <div className="flex items-center mb-2">
+                      <span className={`font-bold text-lg ${serviceColors[report.serviceType]} capitalize`}>
+                        {report.serviceType}
+                      </span>
                     </div>
                     
-                    {report.description && (
+                    <div className="space-y-1 text-sm">
                       <div>
-                        <strong>Descripción:</strong> {report.description}
+                        <strong>Proveedor:</strong> {report.provider}
                       </div>
-                    )}
-                    
-                    <div className="flex items-center justify-between pt-2 border-t">
-                      <span className="text-gray-600">
-                        {report.confirmations || 0} confirmación{(report.confirmations || 0) !== 1 ? 'es' : ''}
-                      </span>
-                      <span className="text-xs text-gray-500">
-                        {new Date(report.createdAt?.toDate?.() || report.createdAt).toLocaleDateString()}
-                      </span>
+                      
+                      {report.locationName && (
+                        <div>
+                          <strong>Ubicación:</strong> {report.locationName}
+                        </div>
+                      )}
+                      
+                      {report.description && (
+                        <div>
+                          <strong>Descripción:</strong> {report.description}
+                        </div>
+                      )}
+                      
+                      <div className="flex items-center justify-between pt-2 border-t">
+                        <span className="text-gray-600">
+                          {report.confirmations || 0} confirmación{(report.confirmations || 0) !== 1 ? 'es' : ''}
+                        </span>
+                        <span className="text-xs text-gray-500">
+                          {new Date(report.createdAt?.toDate?.() || report.createdAt).toLocaleDateString()}
+                        </span>
+                      </div>
                     </div>
                   </div>
-                </div>
-              </Popup>
-            </Marker>
+                </Popup>
+              </Marker>
+            </React.Fragment>
           );
         })}
       </MapContainer>

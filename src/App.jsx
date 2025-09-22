@@ -222,18 +222,19 @@ function App() {
                 {[
                   { key: 'map', label: 'Mapa', icon: '🗺️' },
                   { key: 'create', label: 'Crear', icon: '➕' },
-                  { key: 'list', label: 'Lista', icon: '📋' }
+                  { key: 'list', label: 'Lista', icon: '📋' },
+                  { key: 'legend', label: 'Leyenda', icon: '🔍' }
                 ].map(tab => (
                   <button
                     key={tab.key}
                     onClick={() => setActiveTab(tab.key)}
-                    className={`flex-1 flex items-center justify-center py-3 text-sm font-medium ${
+                    className={`flex-1 flex items-center justify-center py-3 text-xs font-medium ${
                       activeTab === tab.key
                         ? 'text-red-600 border-b-2 border-red-600'
                         : 'text-gray-500 hover:text-gray-700'
                     }`}
                   >
-                    <span className="mr-2">{tab.icon}</span>
+                    <span className="mr-1">{tab.icon}</span>
                     {tab.label}
                   </button>
                 ))}
@@ -260,6 +261,71 @@ function App() {
                 reports={reports} 
                 user={user} 
               />
+            </div>
+
+            {/* Mobile Map Legend */}
+            <div className={`rounded-xl shadow-xl mt-6 bg-white p-6 ${activeTab !== 'legend' ? 'hidden' : 'lg:hidden'}`}>
+              <h3 className="text-lg font-bold text-gray-800 mb-4 flex items-center">
+                <span className="mr-2">🗺️</span>
+                Leyenda del Mapa
+              </h3>
+              
+              <div className="space-y-4">
+                <div className="text-sm text-gray-600">
+                  <strong>¿Qué significan los círculos en el mapa?</strong>
+                </div>
+                
+                <div className="bg-gray-50 p-4 rounded-lg">
+                  <p className="text-sm text-gray-700 mb-3">
+                    Los círculos coloreados muestran las <strong>áreas afectadas</strong> alrededor de cada reporte. 
+                    Cada círculo tiene un radio de aproximadamente 500 metros.
+                  </p>
+                </div>
+                
+                <div className="space-y-3">
+                  <div className="text-sm font-semibold text-gray-700 mb-2">Colores por tipo de servicio:</div>
+                  
+                  <div className="space-y-2">
+                    <div className="flex items-center space-x-3 p-2 bg-red-50 rounded">
+                      <div className="w-6 h-6 rounded-full border-2 border-red-600 bg-red-600 bg-opacity-20"></div>
+                      <div>
+                        <span className="text-sm font-medium text-gray-800">Electricidad</span>
+                        <div className="text-xs text-gray-600">Cortes de luz, problemas eléctricos</div>
+                      </div>
+                    </div>
+                    
+                    <div className="flex items-center space-x-3 p-2 bg-blue-50 rounded">
+                      <div className="w-6 h-6 rounded-full border-2 border-blue-600 bg-blue-600 bg-opacity-20"></div>
+                      <div>
+                        <span className="text-sm font-medium text-gray-800">Agua</span>
+                        <div className="text-xs text-gray-600">Cortes de agua, problemas de abastecimiento</div>
+                      </div>
+                    </div>
+                    
+                    <div className="flex items-center space-x-3 p-2 bg-green-50 rounded">
+                      <div className="w-6 h-6 rounded-full border-2 border-green-600 bg-green-600 bg-opacity-20"></div>
+                      <div>
+                        <span className="text-sm font-medium text-gray-800">Internet</span>
+                        <div className="text-xs text-gray-600">Fallas de conexión, problemas de red</div>
+                      </div>
+                    </div>
+                    
+                    <div className="flex items-center space-x-3 p-2 bg-orange-50 rounded">
+                      <div className="w-6 h-6 rounded-full border-2 border-orange-600 bg-orange-600 bg-opacity-20"></div>
+                      <div>
+                        <span className="text-sm font-medium text-gray-800">Otros servicios</span>
+                        <div className="text-xs text-gray-600">Teléfono, cable, otros servicios públicos</div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                
+                <div className="bg-blue-50 p-3 rounded-lg">
+                  <div className="text-xs text-blue-800">
+                    <strong>💡 Tip:</strong> Si ves un círculo cerca de tu ubicación, es posible que también experimentes problemas con ese servicio.
+                  </div>
+                </div>
+              </div>
             </div>
             
           </div>
@@ -328,6 +394,42 @@ function App() {
                 <div className="bg-emerald-50 p-3 rounded-lg flex justify-between items-center">
                   <span className="text-gray-700 font-medium">Estado:</span>
                   <span className="font-bold text-emerald-600">✅ En línea</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Map Legend - Desktop only */}
+            <div className="hidden lg:block bg-white rounded-xl shadow-xl p-6">
+              <h3 className="text-lg font-bold text-gray-800 mb-4 flex items-center">
+                <span className="mr-2">🗺️</span>
+                Leyenda del Mapa
+              </h3>
+              <div className="space-y-3">
+                <div className="text-xs text-gray-600 mb-3">
+                  <strong>Áreas Afectadas:</strong> Los círculos muestran las zonas con problemas reportados
+                </div>
+                
+                <div className="space-y-2">
+                  <div className="flex items-center space-x-3">
+                    <div className="w-4 h-4 rounded-full border-2 border-red-600 bg-red-600 bg-opacity-10"></div>
+                    <span className="text-sm text-gray-700">Electricidad</span>
+                  </div>
+                  <div className="flex items-center space-x-3">
+                    <div className="w-4 h-4 rounded-full border-2 border-blue-600 bg-blue-600 bg-opacity-10"></div>
+                    <span className="text-sm text-gray-700">Agua</span>
+                  </div>
+                  <div className="flex items-center space-x-3">
+                    <div className="w-4 h-4 rounded-full border-2 border-green-600 bg-green-600 bg-opacity-10"></div>
+                    <span className="text-sm text-gray-700">Internet</span>
+                  </div>
+                  <div className="flex items-center space-x-3">
+                    <div className="w-4 h-4 rounded-full border-2 border-orange-600 bg-orange-600 bg-opacity-10"></div>
+                    <span className="text-sm text-gray-700">Otros servicios</span>
+                  </div>
+                </div>
+                
+                <div className="text-xs text-gray-500 mt-3 pt-3 border-t">
+                  💡 Cada círculo representa un área de ~500m de radio donde podría haber afectaciones
                 </div>
               </div>
             </div>

@@ -131,6 +131,13 @@ const ReportList = ({ reports, user }) => {
                   <span className="text-gray-600">{report.provider}</span>
                 </div>
 
+                {report.locationName && (
+                  <div>
+                    <span className="font-semibold text-gray-700">Ubicación: </span>
+                    <span className="text-gray-600">{report.locationName}</span>
+                  </div>
+                )}
+
                 {report.description && (
                   <div>
                     <span className="font-semibold text-gray-700">Descripción: </span>
