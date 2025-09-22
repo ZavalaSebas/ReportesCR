@@ -17,24 +17,30 @@ const serviceIcons = {
 
 const ReportList = ({ reports, user }) => {
   const [confirmingReports, setConfirmingReports] = useState(new Set());
+  const [confirmedReports, setConfirmedReports] = useState(new Set());
 
   const handleConfirmReport = async (reportId) => {
-    if (!user) {
-      alert('Debes iniciar sesión para confirmar reportes.');
+    // Check if user already confirmed this report in this session
+    if (confirmedReports.has(reportId)) {
+      alert('Ya confirmaste este reporte en esta sesión.');
       return;
     }
 
-    // Check if user already confirmed this report
-    const report = reports.find(r => r.id === reportId);
-    if (report?.confirmed_by?.includes(user.uid)) {
-      alert('Ya confirmaste este reporte anteriormente.');
-      return;
+    // If user is logged in, check if they confirmed it before
+    if (user) {
+      const report = reports.find(r => r.id === reportId);
+      if (report?.confirmed_by?.includes(user.uid)) {
+        alert('Ya confirmaste este reporte anteriormente.');
+        return;
+      }
     }
 
     setConfirmingReports(prev => new Set([...prev, reportId]));
 
     try {
-      await confirmReport(reportId, user.uid);
+      // Pass user.uid if available, null otherwise (anonymous confirmation)
+      await confirmReport(reportId, user?.uid || null);
+      setConfirmedReports(prev => new Set([...prev, reportId]));
       alert('¡Gracias por confirmar el reporte!');
     } catch (error) {
       console.error('Error confirming report:', error);
@@ -146,25 +152,26 @@ const ReportList = ({ reports, user }) => {
                   </span>
                 </div>
 
-                {user && !isOwnReport && (
+                {!isOwnReport && (
                   <button
                     onClick={() => handleConfirmReport(report.id)}
-                    disabled={isConfirming || userConfirmed}
+                    disabled={isConfirming || userConfirmed || confirmedReports.has(report.id)}
                     className={`px-3 py-1 text-sm rounded-md font-medium transition-colors ${
-                      userConfirmed
+                      userConfirmed || confirmedReports.has(report.id)
                         ? 'bg-green-100 text-green-800 cursor-not-allowed'
                         : isConfirming
                         ? 'bg-gray-100 text-gray-500 cursor-not-allowed'
-                        : 'bg-blue-100 text-blue-800 hover:bg-blue-200'
+                        : 'bg-red-100 text-red-800 hover:bg-red-200'
                     }`}
                   >
-                    {isConfirming ? 'Confirmando...' : userConfirmed ? '✓ Confirmado' : 'Confirmar'}
+                    {isConfirming ? 'Confirmando...' : 
+                     (userConfirmed || confirmedReports.has(report.id)) ? '✓ Confirmado' : 'Confirmar'}
                   </button>
                 )}
 
                 {isOwnReport && (
                   <span className="px-3 py-1 text-sm rounded-md bg-gray-100 text-gray-600">
-                    Tu reporte
+                    {user ? 'Tu reporte' : 'Reporte propio'}
                   </span>
                 )}
               </div>

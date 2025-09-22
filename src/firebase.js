@@ -89,7 +89,7 @@ export const subscribeToReports = (callback) => {
   );
 };
 
-export const confirmReport = async (reportId, userId) => {
+export const confirmReport = async (reportId, userId = null) => {
   try {
     const reportRef = doc(db, "reports", reportId);
     // Get the current document first
@@ -102,16 +102,22 @@ export const confirmReport = async (reportId, userId) => {
     const reportData = reportDoc.data();
     const confirmedBy = reportData.confirmed_by || [];
     
-    // Check if user already confirmed
-    if (confirmedBy.includes(userId)) {
+    // Check if user already confirmed (only if userId is provided)
+    if (userId && confirmedBy.includes(userId)) {
       throw new Error("You have already confirmed this report");
     }
     
     // Update the document
-    await updateDoc(reportRef, {
-      confirmations: increment(1),
-      confirmed_by: [...confirmedBy, userId]
-    });
+    const updateData = {
+      confirmations: increment(1)
+    };
+    
+    // Only add to confirmed_by if userId is provided (authenticated user)
+    if (userId) {
+      updateData.confirmed_by = [...confirmedBy, userId];
+    }
+    
+    await updateDoc(reportRef, updateData);
     
     console.log("Report confirmed successfully");
   } catch (error) {
