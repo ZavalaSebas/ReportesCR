@@ -295,6 +295,31 @@ html {
     background: var(--bg-secondary) !important;
     border: 1px solid var(--border-primary) !important;
   }
+  
+  /* Fix text colors inside popups for dark mode */
+  .leaflet-popup-content {
+    color: var(--text-primary) !important;
+  }
+  
+  .leaflet-popup-content strong,
+  .leaflet-popup-content span {
+    color: var(--text-primary) !important;
+  }
+  
+  /* Fix provider text in popups */
+  .leaflet-popup-content p,
+  .leaflet-popup-content div {
+    color: var(--text-primary) !important;
+  }
+  
+  /* Make sure buttons and links are visible */
+  .leaflet-popup-content button {
+    color: white !important;
+  }
+  
+  .leaflet-popup-content a {
+    color: var(--primary-400) !important;
+  }
 }
 
 /* Mobile popup improvements */

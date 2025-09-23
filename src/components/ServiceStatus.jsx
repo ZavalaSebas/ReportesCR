@@ -133,8 +133,8 @@ const ServiceStatus = ({ reports }) => {
         })}
       </div>
       
-      <div className="mt-4 p-3 bg-gray-50 rounded-lg border border-gray-200">
-        <div className="text-sm text-gray-600 text-center font-medium">
+      <div className="mt-4 p-3 bg-gray-50 dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
+        <div className="text-sm text-gray-600 dark:text-gray-300 text-center font-medium">
           📊 Datos actualizados cada minuto • Últimas 24 horas
         </div>
       </div>

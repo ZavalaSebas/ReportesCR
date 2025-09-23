@@ -97,7 +97,7 @@ const NearbyReports = ({ reports, userLocation, user }) => {
             <span className="text-2xl">📍</span>
           </div>
           <div className="loading-shimmer h-4 w-32 mx-auto rounded mb-2"></div>
-          <p className="text-sm text-gray-600 font-medium">
+          <p className="text-sm text-gray-600 dark:text-gray-300 font-medium">
             Obteniendo tu ubicación...
           </p>
         </div>
@@ -117,10 +117,10 @@ const NearbyReports = ({ reports, userLocation, user }) => {
           <div className="w-16 h-16 bg-gradient-to-br from-green-100 to-green-200 rounded-2xl flex items-center justify-center mx-auto mb-4">
             <span className="text-3xl">✅</span>
           </div>
-          <h4 className="text-lg font-semibold text-gray-800 mb-2">
+          <h4 className="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-2">
             Todo normal en tu área
           </h4>
-          <p className="text-sm text-gray-600">
+          <p className="text-sm text-gray-600 dark:text-gray-300">
             No hay reportes de servicios en un radio de 5km
           </p>
         </div>
@@ -133,7 +133,7 @@ const NearbyReports = ({ reports, userLocation, user }) => {
             return (
               <div
                 key={report.id}
-                className="bg-white border border-gray-200 rounded-xl p-4 hover:shadow-md transition-all duration-200 cursor-pointer group"
+                className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl p-4 hover:shadow-md transition-all duration-200 cursor-pointer group"
               >
                 <div className="flex items-start space-x-3">
                   <div className="flex-shrink-0">
@@ -147,31 +147,31 @@ const NearbyReports = ({ reports, userLocation, user }) => {
                       <h4 className={`text-sm font-bold ${serviceInfo.color} capitalize`}>
                         {report.serviceType}
                         {isOwnReport && (
-                          <span className="ml-2 px-2 py-0.5 text-xs text-blue-700 bg-blue-100 rounded-full">Tu reporte</span>
+                          <span className="ml-2 px-2 py-0.5 text-xs text-blue-700 dark:text-blue-300 bg-blue-100 dark:bg-blue-900/30 rounded-full">Tu reporte</span>
                         )}
                       </h4>
-                      <span className="text-xs text-gray-500 font-medium bg-gray-100 px-2 py-1 rounded-full">
+                      <span className="text-xs text-gray-500 dark:text-gray-400 font-medium bg-gray-100 dark:bg-gray-700 px-2 py-1 rounded-full">
                         {formatTimeAgo(report.createdAt)}
                       </span>
                     </div>
                     
-                    <p className="text-sm text-gray-700 mb-3 font-medium">
+                    <p className="text-sm text-gray-700 dark:text-gray-300 mb-3 font-medium">
                       {report.provider && (
-                        <span className="text-gray-900">{report.provider}</span>
+                        <span className="text-gray-900 dark:text-gray-100">{report.provider}</span>
                       )}
                       {report.provider && report.locationName && (
-                        <span className="text-gray-500"> • </span>
+                        <span className="text-gray-500 dark:text-gray-400"> • </span>
                       )}
-                      <span className="text-gray-600">{report.locationName}</span>
+                      <span className="text-gray-600 dark:text-gray-300">{report.locationName}</span>
                     </p>
                     
                     <div className="flex items-center justify-between">
                       <div className="flex items-center space-x-3">
-                        <span className="text-xs font-medium text-orange-600 bg-orange-50 px-2 py-1 rounded-full">
+                        <span className="text-xs font-medium text-orange-600 dark:text-orange-300 bg-orange-50 dark:bg-orange-900/30 px-2 py-1 rounded-full">
                           📍 {report.distance.toFixed(1)} km
                         </span>
                         {report.confirmations > 0 && (
-                          <span className="text-xs font-medium text-green-600 bg-green-50 px-2 py-1 rounded-full">
+                          <span className="text-xs font-medium text-green-600 dark:text-green-300 bg-green-50 dark:bg-green-900/30 px-2 py-1 rounded-full">
                             👥 {report.confirmations}
                           </span>
                         )}
@@ -183,8 +183,8 @@ const NearbyReports = ({ reports, userLocation, user }) => {
             );
           })}
           
-          <div className="mt-4 p-3 bg-gradient-to-r from-gray-50 to-gray-100 rounded-lg border border-gray-200">
-            <p className="text-xs text-gray-600 text-center font-medium">
+          <div className="mt-4 p-3 bg-gradient-to-r from-gray-50 to-gray-100 dark:from-gray-800 dark:to-gray-700 rounded-lg border border-gray-200 dark:border-gray-600">
+            <p className="text-xs text-gray-600 dark:text-gray-300 text-center font-medium">
               📡 Radio de búsqueda: 5 kilómetros
             </p>
           </div>

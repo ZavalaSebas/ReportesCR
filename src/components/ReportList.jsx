@@ -2,12 +2,12 @@ import React, { useState } from 'react';
 import { confirmReport } from '../firebase';
 
 const serviceColors = {
-  luz: 'bg-red-100 text-red-800 border-red-200',
-  agua: 'bg-blue-100 text-blue-800 border-blue-200',
-  internet: 'bg-green-100 text-green-800 border-green-200',
-  otros: 'bg-yellow-100 text-yellow-800 border-yellow-200',
+  luz: 'bg-red-100 text-red-800 border-red-200 dark:bg-red-900/30 dark:text-red-300 dark:border-red-700',
+  agua: 'bg-blue-100 text-blue-800 border-blue-200 dark:bg-blue-900/30 dark:text-blue-300 dark:border-blue-700',
+  internet: 'bg-green-100 text-green-800 border-green-200 dark:bg-green-900/30 dark:text-green-300 dark:border-green-700',
+  otros: 'bg-yellow-100 text-yellow-800 border-yellow-200 dark:bg-yellow-900/30 dark:text-yellow-300 dark:border-yellow-700',
   // Default fallback color for any unrecognized service types
-  default: 'bg-gray-100 text-gray-800 border-gray-200'
+  default: 'bg-gray-100 text-gray-800 border-gray-200 dark:bg-gray-800 dark:text-gray-300 dark:border-gray-600'
 };
 
 // Helper function to get service color safely
@@ -123,20 +123,20 @@ const ReportList = ({ reports, user }) => {
 
   if (reports.length === 0) {
     return (
-      <div className="bg-white rounded-lg shadow-md p-6">
-        <h2 className="text-xl font-bold text-gray-800 mb-4">Reportes Recientes</h2>
+      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
+        <h2 className="text-xl font-bold text-gray-800 dark:text-gray-200 mb-4">Reportes Recientes</h2>
         <div className="text-center py-8">
-          <div className="text-gray-400 text-5xl mb-4">📋</div>
-          <p className="text-gray-600">No hay reportes disponibles aún.</p>
-          <p className="text-sm text-gray-500 mt-2">¡Sé el primero en reportar un problema!</p>
+          <div className="text-gray-400 dark:text-gray-500 text-5xl mb-4">📋</div>
+          <p className="text-gray-600 dark:text-gray-300">No hay reportes disponibles aún.</p>
+          <p className="text-sm text-gray-500 dark:text-gray-400 mt-2">¡Sé el primero en reportar un problema!</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="bg-white rounded-lg shadow-md p-6">
-      <h2 className="text-xl font-bold text-gray-800 mb-4">
+    <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
+      <h2 className="text-xl font-bold text-gray-800 dark:text-gray-200 mb-4">
         Reportes Recientes ({reports.length})
       </h2>
       
@@ -149,7 +149,7 @@ const ReportList = ({ reports, user }) => {
           return (
             <div
               key={report.id}
-              className="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow"
+              className="border border-gray-200 dark:border-gray-700 rounded-lg p-4 hover:shadow-md transition-shadow bg-white dark:bg-gray-900/50"
             >
               {/* Header */}
               <div className="flex items-start justify-between mb-3">
@@ -165,7 +165,7 @@ const ReportList = ({ reports, user }) => {
                 </div>
                 
                 <div className="text-right">
-                  <div className="text-sm text-gray-500">
+                  <div className="text-sm text-gray-500 dark:text-gray-400">
                     {formatDate(report.createdAt)}
                   </div>
                 </div>
@@ -174,50 +174,50 @@ const ReportList = ({ reports, user }) => {
               {/* Content */}
               <div className="space-y-2">
                 <div>
-                  <span className="font-semibold text-gray-700">Proveedor{formatProviders(report.provider).isMerged ? 'es' : ''}: </span>
+                  <span className="font-semibold text-gray-700 dark:text-gray-300">Proveedor{formatProviders(report.provider).isMerged ? 'es' : ''}: </span>
                   {formatProviders(report.provider).isMerged ? (
-                    <div className="bg-yellow-50 border border-yellow-200 rounded p-2 mt-1">
-                      <div className="text-sm font-medium text-yellow-800 mb-1">
+                    <div className="bg-yellow-50 dark:bg-yellow-900/30 border border-yellow-200 dark:border-yellow-700 rounded p-2 mt-1">
+                      <div className="text-sm font-medium text-yellow-800 dark:text-yellow-300 mb-1">
                         {formatProviders(report.provider).providers.length} proveedores afectados:
                       </div>
                       <div className="space-y-1">
                         {formatProviders(report.provider).providers.map((provider, index) => (
                           <div key={index} className="flex items-center space-x-2">
                             <span className="w-2 h-2 bg-yellow-500 rounded-full"></span>
-                            <span className="text-sm text-gray-700">{provider}</span>
+                            <span className="text-sm text-gray-700 dark:text-gray-300">{provider}</span>
                           </div>
                         ))}
                       </div>
                     </div>
                   ) : (
-                    <span className="text-gray-600">{report.provider}</span>
+                    <span className="text-gray-600 dark:text-gray-300">{report.provider}</span>
                   )}
                 </div>
 
                 {report.locationName && (
                   <div>
-                    <span className="font-semibold text-gray-700">Ubicación: </span>
-                    <span className="text-gray-600">{report.locationName}</span>
+                    <span className="font-semibold text-gray-700 dark:text-gray-300">Ubicación: </span>
+                    <span className="text-gray-600 dark:text-gray-300">{report.locationName}</span>
                   </div>
                 )}
 
                 {report.description && (
                   <div>
-                    <span className="font-semibold text-gray-700">Descripción: </span>
-                    <p className="text-gray-600 text-sm">{report.description}</p>
+                    <span className="font-semibold text-gray-700 dark:text-gray-300">Descripción: </span>
+                    <p className="text-gray-600 dark:text-gray-300 text-sm">{report.description}</p>
                   </div>
                 )}
 
-                <div className="text-sm text-gray-500">
+                <div className="text-sm text-gray-500 dark:text-gray-400">
                   <span className="font-semibold">Reportado por: </span>
                   {report.userName || report.userEmail}
                 </div>
               </div>
 
               {/* Footer */}
-              <div className="flex items-center justify-between mt-4 pt-3 border-t border-gray-100">
+              <div className="flex items-center justify-between mt-4 pt-3 border-t border-gray-100 dark:border-gray-700">
                 <div className="flex items-center space-x-4">
-                  <span className="text-sm text-gray-600">
+                  <span className="text-sm text-gray-600 dark:text-gray-300">
                     👥 {report.confirmations || 0} confirmación{(report.confirmations || 0) !== 1 ? 'es' : ''}
                   </span>
                 </div>
@@ -228,10 +228,10 @@ const ReportList = ({ reports, user }) => {
                     disabled={isConfirming || userConfirmed || confirmedReports.has(report.id)}
                     className={`px-3 py-1 text-sm rounded-md font-medium transition-colors ${
                       userConfirmed || confirmedReports.has(report.id)
-                        ? 'bg-green-100 text-green-800 cursor-not-allowed'
+                        ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300 cursor-not-allowed'
                         : isConfirming
-                        ? 'bg-gray-100 text-gray-500 cursor-not-allowed'
-                        : 'bg-red-100 text-red-800 hover:bg-red-200'
+                        ? 'bg-gray-100 text-gray-500 dark:bg-gray-700 dark:text-gray-400 cursor-not-allowed'
+                        : 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300 hover:bg-red-200 dark:hover:bg-red-900/50'
                     }`}
                   >
                     {isConfirming ? 'Confirmando...' : 
@@ -240,7 +240,7 @@ const ReportList = ({ reports, user }) => {
                 )}
 
                 {isOwnReport && (
-                  <span className="px-3 py-1 text-sm rounded-md bg-gray-100 text-gray-600">
+                  <span className="px-3 py-1 text-sm rounded-md bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-300">
                     {user ? 'Tu reporte' : 'Reporte propio'}
                   </span>
                 )}
