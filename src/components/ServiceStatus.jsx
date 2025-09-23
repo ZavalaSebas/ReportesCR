@@ -95,7 +95,7 @@ const ServiceStatus = ({ reports }) => {
         </h2>
       </div>
       
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
         {Object.entries(services).map(([key, service]) => {
           const level = getStatusLevel(service.count);
           const statusText = getStatusText(service.count);
@@ -103,26 +103,25 @@ const ServiceStatus = ({ reports }) => {
           return (
             <div
               key={key}
-              className={`p-4 rounded-lg border-2 transition-all duration-200 hover:shadow-md ${
+              className={`p-3 rounded-lg border-2 transition-all duration-200 hover:shadow-md ${
                 getStatusColors(level, service.color)
               }`}
             >
-              <div className="flex items-center justify-between mb-2">
-                <div className="flex items-center">
-                  <span className="text-2xl mr-2">{service.icon}</span>
-                  <h3 className="font-semibold text-sm">{service.name}</h3>
+              <div className="flex flex-col items-center text-center space-y-2">
+                <div className="flex items-center justify-center">
+                  <span className="text-xl">{service.icon}</span>
                 </div>
+                <h3 className="font-semibold text-sm">{service.name}</h3>
                 <span className={`px-2 py-1 text-xs font-medium rounded-full ${getStatusBadgeColor(level)}`}>
                   {statusText}
                 </span>
-              </div>
-              
-              <div className="text-sm opacity-80">
-                {service.count === 0 ? (
-                  'Sin reportes'
-                ) : (
-                  `${service.count} reporte${service.count > 1 ? 's' : ''}`
-                )}
+                <div className="text-xs opacity-80">
+                  {service.count === 0 ? (
+                    'Sin reportes'
+                  ) : (
+                    `${service.count} reporte${service.count > 1 ? 's' : ''}`
+                  )}
+                </div>
               </div>
             </div>
           );

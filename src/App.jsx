@@ -542,12 +542,14 @@ function App() {
           {/* Sidebar - 1 column */}
           <div className="lg:col-span-1 space-y-6">
             
-            {/* Nearby Reports */}
-            <NearbyReports 
-              reports={reports} 
-              userLocation={userLocation} 
-              user={user} 
-            />
+            {/* Nearby Reports - Hidden on mobile when in create tab */}
+            <div className={activeTab !== 'create' ? 'block' : 'hidden lg:block'}>
+              <NearbyReports 
+                reports={reports} 
+                userLocation={userLocation} 
+                user={user} 
+              />
+            </div>
             
             {/* Create Report Form */}
             <div className={activeTab !== 'create' ? 'hidden lg:block' : ''}>
