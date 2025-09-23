@@ -109,7 +109,7 @@ const providers = {
   otros: ['Otro']
 };
 
-const ReportForm = ({ user, onReportCreated, selectedLocationForReport, onRequestLocationSelection }) => {
+const ReportForm = ({ user, onReportCreated, selectedLocationForReport, onRequestLocationSelection, onFormDataChange }) => {
   const [formData, setFormData] = useState({
     title: '',
     serviceType: '',
@@ -147,6 +147,13 @@ const ReportForm = ({ user, onReportCreated, selectedLocationForReport, onReques
         });
     }
   }, [selectedLocationForReport]);
+
+  // Notify parent of form data changes
+  useEffect(() => {
+    if (onFormDataChange) {
+      onFormDataChange(formData);
+    }
+  }, [formData, onFormDataChange]);
 
   useEffect(() => {
     // Get user location

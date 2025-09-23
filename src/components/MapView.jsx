@@ -97,19 +97,64 @@ const selectedLocationIcon = new L.Icon({
   shadowSize: [52, 52]
 });
 
+// Helper function to format provider display
+const formatProviders = (providerString) => {
+  if (!providerString) return 'Proveedor no especificado';
+  
+  // Check if it contains multiple providers (merged)
+  if (providerString.includes(' + ')) {
+    const providers = providerString.split(' + ');
+    return {
+      isMerged: true,
+      providers: providers,
+      displayText: `${providers.length} proveedores: ${providerString}`
+    };
+  }
+  
+  return {
+    isMerged: false,
+    providers: [providerString],
+    displayText: providerString
+  };
+};
+
 const MapView = ({ 
   reports, 
   userLocation, 
   isLocationSelectionMode = false, 
   onLocationSelect = null,
-  selectedLocation = null 
+  selectedLocation = null,
+  user = null,
+  onConfirmReport = null,
+  onSmartLocationSelect = null,
+  hasConfirmedReport = null
 }) => {
   // Debug logging
   console.log('🗺️ MapView props:', { 
     isLocationSelectionMode, 
     hasOnLocationSelect: !!onLocationSelect,
-    selectedLocation 
+    selectedLocation,
+    user: !!user
   });
+
+  // Function to handle smart confirmation/location selection
+  const handleSmartConfirmation = (report, latitude, longitude) => {
+    if (isLocationSelectionMode && onSmartLocationSelect && user) {
+      // User is in location selection mode - use smart logic
+      console.log('🧠 Using smart location selection logic');
+      onSmartLocationSelect({ latitude, longitude }, report, reports);
+      return;
+    }
+
+    if (isLocationSelectionMode && onLocationSelect && user) {
+      // Fallback to simple location selection
+      onLocationSelect({ latitude, longitude });
+      return;
+    }
+
+    // Should not reach here since buttons are conditional
+    console.log('No action taken - unexpected state');
+  };
 
   // Default center to Costa Rica coordinates
   const center = userLocation || [9.7489, -83.7534];
@@ -241,7 +286,93 @@ const MapView = ({
                   fillOpacity: circleStyle.fillOpacity,
                   weight: circleStyle.weight
                 }}
-              />
+              >
+                {/* Popup for circles (always show for interaction) */}
+                <Popup>
+                  <div className="p-2 text-center">
+                    <div className="mb-3">
+                      <span className={`font-bold ${serviceColors[report.serviceType]} capitalize`}>
+                        Zona afectada - {report.serviceType}
+                      </span>
+                      <div className="text-sm text-gray-600 mt-1">
+                        {formatProviders(report.provider).isMerged ? (
+                          <div className="bg-yellow-50 p-2 rounded">
+                            <div className="font-medium text-yellow-800 mb-1">
+                              {formatProviders(report.provider).providers.length} proveedores afectados:
+                            </div>
+                            <div className="space-y-1">
+                              {formatProviders(report.provider).providers.map((provider, index) => (
+                                <div key={index} className="flex items-center justify-center space-x-1">
+                                  <span className="w-1.5 h-1.5 bg-yellow-500 rounded-full"></span>
+                                  <span className="text-xs">{provider}</span>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        ) : (
+                          report.provider
+                        )}
+                      </div>
+                    </div>
+                    
+                    <div className="space-y-2">
+                      {/* Confirmation button (always visible) */}
+                      <button
+                        onClick={async (e) => {
+                          e.stopPropagation();
+                          console.log('🎯 Confirming from circle:', report);
+                          
+                          // Check if user already confirmed this report (for logged users)
+                          if (user && report.confirmed_by && report.confirmed_by.includes(user.uid)) {
+                            alert('⚠️ Ya has confirmado este reporte anteriormente');
+                            return;
+                          }
+                          
+                          // Check antispam for non-logged users
+                          if (!user && hasConfirmedReport && hasConfirmedReport(report.id)) {
+                            alert('⚠️ Ya has confirmado este reporte anteriormente desde este dispositivo');
+                            return;
+                          }
+                          
+                          if (onConfirmReport) {
+                            onConfirmReport(report);
+                          }
+                        }}
+                        disabled={
+                          (user && report.confirmed_by && report.confirmed_by.includes(user.uid)) ||
+                          (!user && hasConfirmedReport && hasConfirmedReport(report.id))
+                        }
+                        className={`w-full px-3 py-2 rounded text-sm font-medium transition-colors ${
+                          (user && report.confirmed_by && report.confirmed_by.includes(user.uid)) ||
+                          (!user && hasConfirmedReport && hasConfirmedReport(report.id))
+                            ? 'bg-gray-400 text-gray-600 cursor-not-allowed'
+                            : 'bg-green-600 hover:bg-green-700 text-white'
+                        }`}
+                      >
+                        {(user && report.confirmed_by && report.confirmed_by.includes(user.uid)) ||
+                         (!user && hasConfirmedReport && hasConfirmedReport(report.id))
+                          ? '✅ Ya confirmado'
+                          : '✅ Confirmar este reporte'
+                        }
+                      </button>
+                      
+                      {/* Location selection button (only in selection mode) */}
+                      {isLocationSelectionMode && user && onLocationSelect && (
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            console.log('🎯 Using location from circle:', { latitude, longitude, report });
+                            handleSmartConfirmation(report, latitude, longitude);
+                          }}
+                          className="w-full bg-purple-600 hover:bg-purple-700 text-white px-3 py-2 rounded text-sm font-medium transition-colors"
+                        >
+                          📍 Marcar aquí mi reporte
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                </Popup>
+              </Circle>
               
               {/* Report marker */}
               <Marker
@@ -258,7 +389,21 @@ const MapView = ({
                     
                     <div className="space-y-1 text-sm">
                       <div>
-                        <strong>Proveedor:</strong> {report.provider}
+                        <strong>Proveedor{formatProviders(report.provider).isMerged ? 'es' : ''}:</strong>
+                        <div className={`${formatProviders(report.provider).isMerged ? 'bg-yellow-50 p-2 rounded mt-1' : ''}`}>
+                          {formatProviders(report.provider).isMerged ? (
+                            <div className="space-y-1">
+                              {formatProviders(report.provider).providers.map((provider, index) => (
+                                <div key={index} className="flex items-center space-x-1">
+                                  <span className="w-2 h-2 bg-yellow-500 rounded-full"></span>
+                                  <span>{provider}</span>
+                                </div>
+                              ))}
+                            </div>
+                          ) : (
+                            <span className="text-gray-600">{report.provider}</span>
+                          )}
+                        </div>
                       </div>
                       
                       {report.locationName && (
@@ -280,6 +425,63 @@ const MapView = ({
                         <span className="text-xs text-gray-500">
                           {new Date(report.createdAt?.toDate?.() || report.createdAt).toLocaleDateString()}
                         </span>
+                      </div>
+                      
+                      {/* Smart confirmation/selection buttons */}
+                      <div className="pt-2 border-t mt-2 space-y-2">
+                        {/* Confirmation button (always visible) */}
+                        <button
+                          onClick={async (e) => {
+                            e.stopPropagation();
+                            console.log('🎯 Confirming existing report:', report);
+                            
+                            // Check if user already confirmed this report (for logged users)
+                            if (user && report.confirmed_by && report.confirmed_by.includes(user.uid)) {
+                              alert('⚠️ Ya has confirmado este reporte anteriormente');
+                              return;
+                            }
+                            
+                            // Check antispam for non-logged users
+                            if (!user && hasConfirmedReport && hasConfirmedReport(report.id)) {
+                              alert('⚠️ Ya has confirmado este reporte anteriormente desde este dispositivo');
+                              return;
+                            }
+                            
+                            if (onConfirmReport) {
+                              onConfirmReport(report);
+                            }
+                          }}
+                          disabled={
+                            (user && report.confirmed_by && report.confirmed_by.includes(user.uid)) ||
+                            (!user && hasConfirmedReport && hasConfirmedReport(report.id))
+                          }
+                          className={`w-full px-3 py-2 rounded text-sm font-medium transition-colors ${
+                            (user && report.confirmed_by && report.confirmed_by.includes(user.uid)) ||
+                            (!user && hasConfirmedReport && hasConfirmedReport(report.id))
+                              ? 'bg-gray-400 text-gray-600 cursor-not-allowed'
+                              : 'bg-green-600 hover:bg-green-700 text-white'
+                          }`}
+                        >
+                          {(user && report.confirmed_by && report.confirmed_by.includes(user.uid)) ||
+                           (!user && hasConfirmedReport && hasConfirmedReport(report.id))
+                            ? '✅ Ya confirmado'
+                            : '✅ Confirmar este reporte'
+                          }
+                        </button>
+                        
+                        {/* Location selection button (only in selection mode) */}
+                        {isLocationSelectionMode && user && onLocationSelect && (
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              console.log('🎯 Using location from popup:', { latitude, longitude, report });
+                              handleSmartConfirmation(report, latitude, longitude);
+                            }}
+                            className="w-full bg-purple-600 hover:bg-purple-700 text-white px-3 py-2 rounded text-sm font-medium transition-colors"
+                          >
+                            📍 Usar esta ubicación
+                          </button>
+                        )}
                       </div>
                     </div>
                   </div>

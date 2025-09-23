@@ -15,6 +15,27 @@ const serviceIcons = {
   otros: '🔧'
 };
 
+// Helper function to format provider display
+const formatProviders = (providerString) => {
+  if (!providerString) return 'Proveedor no especificado';
+  
+  // Check if it contains multiple providers (merged)
+  if (providerString.includes(' + ')) {
+    const providers = providerString.split(' + ');
+    return {
+      isMerged: true,
+      providers: providers,
+      displayText: `${providers.length} proveedores: ${providerString}`
+    };
+  }
+  
+  return {
+    isMerged: false,
+    providers: [providerString],
+    displayText: providerString
+  };
+};
+
 const ReportList = ({ reports, user }) => {
   const [confirmingReports, setConfirmingReports] = useState(new Set());
   const [confirmedReports, setConfirmedReports] = useState(new Set());
@@ -127,8 +148,24 @@ const ReportList = ({ reports, user }) => {
               {/* Content */}
               <div className="space-y-2">
                 <div>
-                  <span className="font-semibold text-gray-700">Proveedor: </span>
-                  <span className="text-gray-600">{report.provider}</span>
+                  <span className="font-semibold text-gray-700">Proveedor{formatProviders(report.provider).isMerged ? 'es' : ''}: </span>
+                  {formatProviders(report.provider).isMerged ? (
+                    <div className="bg-yellow-50 border border-yellow-200 rounded p-2 mt-1">
+                      <div className="text-sm font-medium text-yellow-800 mb-1">
+                        {formatProviders(report.provider).providers.length} proveedores afectados:
+                      </div>
+                      <div className="space-y-1">
+                        {formatProviders(report.provider).providers.map((provider, index) => (
+                          <div key={index} className="flex items-center space-x-2">
+                            <span className="w-2 h-2 bg-yellow-500 rounded-full"></span>
+                            <span className="text-sm text-gray-700">{provider}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  ) : (
+                    <span className="text-gray-600">{report.provider}</span>
+                  )}
                 </div>
 
                 {report.locationName && (

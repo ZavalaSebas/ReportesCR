@@ -132,3 +132,53 @@ export const confirmReport = async (reportId, userId = null) => {
     throw error;
   }
 };
+
+export const mergeProviderToReport = async (reportId, newProvider, userId = null) => {
+  try {
+    console.log("🔄 Attempting to merge provider:", { reportId, newProvider, userId });
+    
+    const reportRef = doc(db, "reports", reportId);
+    // Get the current document first
+    const reportDoc = await getDoc(reportRef);
+    
+    if (!reportDoc.exists()) {
+      throw new Error("Report not found");
+    }
+    
+    const reportData = reportDoc.data();
+    const currentProvider = reportData.provider;
+    
+    console.log("📋 Current report data:", { currentProvider, confirmedBy: reportData.confirmed_by });
+    
+    // Check if provider is already included
+    if (currentProvider.includes(newProvider)) {
+      throw new Error("Provider already included in this report");
+    }
+    
+    // Create merged provider string
+    const mergedProvider = `${currentProvider} + ${newProvider}`;
+    
+    // Update the document with only allowed fields
+    const updateData = {
+      provider: mergedProvider
+    };
+    
+    // Add to confirmed_by if userId is provided
+    if (userId) {
+      const confirmedBy = reportData.confirmed_by || [];
+      if (!confirmedBy.includes(userId)) {
+        updateData.confirmed_by = [...confirmedBy, userId];
+      }
+    }
+    
+    console.log("📝 Update data:", updateData);
+    
+    await updateDoc(reportRef, updateData);
+    
+    console.log("✅ Provider merged successfully:", mergedProvider);
+    return mergedProvider;
+  } catch (error) {
+    console.error("❌ Error merging provider:", error);
+    throw error;
+  }
+};

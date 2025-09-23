@@ -16,6 +16,16 @@ service cloud.firestore {
       // Allow update for confirmations - both authenticated and anonymous users
       allow update: if request.resource.data.diff(resource.data).affectedKeys().hasOnly(['confirmations', 'confirmed_by'])
         && request.resource.data.confirmations == resource.data.confirmations + 1;
+      
+      // Allow update for provider merging - authenticated users can merge providers
+      allow update: if request.auth != null 
+        && request.auth.uid != null
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['provider', 'confirmed_by']);
+        
+      // Allow update for provider only - authenticated users
+      allow update: if request.auth != null 
+        && request.auth.uid != null
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['provider']);
     }
   }
 }

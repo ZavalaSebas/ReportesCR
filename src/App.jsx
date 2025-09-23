@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { onAuthStateChanged } from 'firebase/auth';
-import { auth, loginWithGoogle, logout, subscribeToReports } from './firebase';
+import { auth, loginWithGoogle, logout, subscribeToReports, confirmReport, mergeProviderToReport } from './firebase';
 import MapView from './components/MapView';
 import ReportForm from './components/ReportForm';
 import ReportList from './components/ReportList';
@@ -15,6 +15,154 @@ function App() {
   const [activeTab, setActiveTab] = useState('map');
   const [isLocationSelectionMode, setIsLocationSelectionMode] = useState(false);
   const [selectedLocationForReport, setSelectedLocationForReport] = useState(null);
+  const [currentFormData, setCurrentFormData] = useState({
+    serviceType: '',
+    provider: '',
+    title: '',
+    description: ''
+  });
+
+  // Antispam system for non-logged users
+  const STORAGE_KEY = 'reportesCR_confirmedReports';
+  
+  const getConfirmedReports = () => {
+    try {
+      const stored = localStorage.getItem(STORAGE_KEY);
+      return stored ? JSON.parse(stored) : [];
+    } catch (error) {
+      console.error('Error reading confirmed reports from localStorage:', error);
+      return [];
+    }
+  };
+  
+  const addConfirmedReport = (reportId) => {
+    try {
+      const confirmed = getConfirmedReports();
+      if (!confirmed.includes(reportId)) {
+        confirmed.push(reportId);
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(confirmed));
+      }
+    } catch (error) {
+      console.error('Error saving confirmed report to localStorage:', error);
+    }
+  };
+  
+  const hasConfirmedReport = (reportId) => {
+    const confirmed = getConfirmedReports();
+    return confirmed.includes(reportId);
+  };
+
+  // Function to calculate distance between two points (Haversine formula)
+  const calculateDistance = (lat1, lon1, lat2, lon2) => {
+    const R = 6371; // Earth's radius in kilometers
+    const dLat = (lat2 - lat1) * Math.PI / 180;
+    const dLon = (lon2 - lon1) * Math.PI / 180;
+    const a = 
+      Math.sin(dLat/2) * Math.sin(dLat/2) +
+      Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * 
+      Math.sin(dLon/2) * Math.sin(dLon/2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+    return R * c * 1000; // Return distance in meters
+  };
+
+  // Smart location selection with intelligent merging/confirmation
+  const handleSmartLocationSelection = async (selectedLocation, clickedReport, allReports) => {
+    console.log('🧠 Smart location selection:', { 
+      selectedLocation, 
+      clickedReport, 
+      currentFormData,
+      allReports: allReports.length 
+    });
+    
+    // Validate that we have current form data
+    if (!currentFormData.serviceType || !currentFormData.provider) {
+      alert('⚠️ Por favor selecciona el tipo de servicio y proveedor antes de marcar la ubicación');
+      return;
+    }
+    
+    const EXACT_LOCATION_THRESHOLD = 50; // meters for "exact same location"
+    const { latitude, longitude } = selectedLocation;
+    
+    // Find reports at the exact same location (within 50m threshold)
+    const sameLocationReports = allReports.filter(report => {
+      const reportLat = report.latitude || report.location?.latitude;
+      const reportLng = report.longitude || report.location?.longitude;
+      
+      if (!reportLat || !reportLng) return false;
+      
+      const distance = calculateDistance(latitude, longitude, reportLat, reportLng);
+      return distance <= EXACT_LOCATION_THRESHOLD;
+    });
+    
+    console.log('📍 Found reports at same location:', sameLocationReports.length);
+    
+    if (sameLocationReports.length > 0) {
+      // Check for same service + same provider (using current form data)
+      const exactMatch = sameLocationReports.find(report => 
+        report.serviceType === currentFormData.serviceType && 
+        report.provider === currentFormData.provider
+      );
+      
+      if (exactMatch) {
+        console.log('✅ Exact match found (same service + provider) - confirming existing report');
+        try {
+          await confirmReport(exactMatch.id, user?.uid || null);
+          alert('✅ Reporte confirmado exitosamente - se encontró un reporte idéntico');
+          setIsLocationSelectionMode(false);
+          setActiveTab('create');
+          return;
+        } catch (error) {
+          console.error('Error confirming exact match:', error);
+          if (error.message.includes('already confirmed')) {
+            alert('⚠️ Ya has confirmado este reporte anteriormente');
+            setIsLocationSelectionMode(false);
+            setActiveTab('create');
+            return;
+          } else {
+            alert('❌ Error al confirmar el reporte. Creando uno nuevo...');
+          }
+        }
+      }
+      
+      // Check for same service but different provider (using current form data)
+      const sameServiceMatch = sameLocationReports.find(report => 
+        report.serviceType === currentFormData.serviceType && 
+        report.provider !== currentFormData.provider &&
+        !report.provider.includes(currentFormData.provider) // Don't merge if already included
+      );
+      
+      if (sameServiceMatch) {
+        console.log('🔄 Same service, different provider - merging providers');
+        try {
+          const mergedProvider = await mergeProviderToReport(
+            sameServiceMatch.id, 
+            currentFormData.provider, 
+            user?.uid || null
+          );
+          alert(`✅ Proveedor fusionado exitosamente!\nReporte actualizado: ${currentFormData.serviceType} - ${mergedProvider}`);
+          setIsLocationSelectionMode(false);
+          setActiveTab('create');
+          return;
+        } catch (error) {
+          console.error('Error merging provider:', error);
+          if (error.message.includes('already included')) {
+            alert('⚠️ Este proveedor ya está incluido en el reporte');
+            setIsLocationSelectionMode(false);
+            setActiveTab('create');
+            return;
+          } else {
+            alert('❌ Error al fusionar proveedor. Creando reporte separado...');
+          }
+        }
+      }
+    }
+    
+    // Use the selected location for new report (either no conflicts or different service/provider)
+    console.log('📍 Using selected location for new report');
+    setSelectedLocationForReport(selectedLocation);
+    setIsLocationSelectionMode(false);
+    setActiveTab('create');
+  };
 
   useEffect(() => {
     console.log('App component mounted/updated', {
@@ -224,7 +372,6 @@ function App() {
                 {[
                   { key: 'map', label: 'Mapa', icon: '🗺️' },
                   { key: 'create', label: 'Crear', icon: '➕' },
-                  { key: 'list', label: 'Lista', icon: '📋' },
                   { key: 'legend', label: 'Leyenda', icon: '🔍' }
                 ].map(tab => (
                   <button
@@ -251,6 +398,8 @@ function App() {
                   userLocation={userLocation} 
                   isLocationSelectionMode={isLocationSelectionMode}
                   selectedLocation={selectedLocationForReport}
+                  user={user}
+                  hasConfirmedReport={hasConfirmedReport}
                   onLocationSelect={(location) => {
                     console.log('🟢 Location selected from map:', location);
                     if (location === 'EXIT_SELECTION_MODE') {
@@ -264,6 +413,35 @@ function App() {
                       console.log('🟢 Location updated, staying in selection mode');
                     }
                   }}
+                  onSmartLocationSelect={handleSmartLocationSelection}
+                  onConfirmReport={async (report) => {
+                    console.log('🟢 Confirming report:', report);
+                    
+                    // Check antispam for non-logged users
+                    if (!user && hasConfirmedReport(report.id)) {
+                      alert('⚠️ Ya has confirmado este reporte anteriormente desde este dispositivo');
+                      return;
+                    }
+                    
+                    try {
+                      await confirmReport(report.id, user?.uid || null);
+                      
+                      // Add to localStorage for non-logged users
+                      if (!user) {
+                        addConfirmedReport(report.id);
+                      }
+                      
+                      // Show success message
+                      alert('✅ Reporte confirmado exitosamente');
+                    } catch (error) {
+                      console.error('Error confirming report:', error);
+                      if (error.message.includes('already confirmed')) {
+                        alert('⚠️ Ya has confirmado este reporte anteriormente');
+                      } else {
+                        alert('❌ Error al confirmar el reporte. Inténtalo de nuevo.');
+                      }
+                    }
+                  }}
                 />
               ) : (
                 <div className="h-96 bg-gray-200 flex items-center justify-center">
@@ -272,8 +450,16 @@ function App() {
               )}
             </div>
 
-            {/* Reports List */}
-            <div className={`rounded-xl shadow-xl mt-6 ${activeTab !== 'list' ? 'hidden lg:block' : ''}`}>
+            {/* Reports List - Shown below map on mobile only */}
+            <div className={`rounded-xl shadow-xl mt-6 ${activeTab === 'map' ? 'lg:hidden' : 'hidden'}`}>
+              <ReportList 
+                reports={reports} 
+                user={user} 
+              />
+            </div>
+
+            {/* Reports List - Desktop version in original position */}
+            <div className="hidden lg:block rounded-xl shadow-xl mt-6">
               <ReportList 
                 reports={reports} 
                 user={user} 
@@ -362,11 +548,22 @@ function App() {
                     setActiveTab('map');
                     console.log('🔴 State set - isLocationSelectionMode: true, activeTab: map');
                   }}
+                  onFormDataChange={(formData) => {
+                    console.log('📝 Form data changed:', formData);
+                    setCurrentFormData(formData);
+                  }}
                   onReportCreated={() => {
                     console.log('Report created successfully, refreshing view...');
                     // Reset location selection state
                     setSelectedLocationForReport(null);
                     setIsLocationSelectionMode(false);
+                    // Reset form data
+                    setCurrentFormData({
+                      serviceType: '',
+                      provider: '',
+                      title: '',
+                      description: ''
+                    });
                     // Switch to map view on mobile after creating report
                     if (window.innerWidth < 1024) {
                       setActiveTab('map');
