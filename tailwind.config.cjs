@@ -4,7 +4,7 @@ module.exports = {
     "./index.html",
     "./src/**/*.{js,jsx}"
   ],
-  darkMode: 'media', // Enables dark mode based on user's system preference
+  darkMode: 'class', // Enables dark mode based on class toggle
   theme: {
     extend: {},
   },

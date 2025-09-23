@@ -149,7 +149,7 @@ const ReportList = ({ reports, user }) => {
           return (
             <div
               key={report.id}
-              className="border border-gray-200 dark:border-gray-700 rounded-lg p-4 hover:shadow-md transition-shadow bg-white dark:bg-gray-900/50"
+              className="border border-gray-200 dark:border-gray-700 rounded-lg p-4 hover:shadow-md transition-shadow bg-white dark:bg-gray-900"
             >
               {/* Header */}
               <div className="flex items-start justify-between mb-3">

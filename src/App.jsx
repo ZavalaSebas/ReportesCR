@@ -23,6 +23,16 @@ function App() {
     title: '',
     description: ''
   });
+  
+  // Theme management
+  const [isDarkMode, setIsDarkMode] = useState(() => {
+    // Check if user has a saved preference, otherwise use system preference
+    const saved = localStorage.getItem('theme');
+    if (saved) {
+      return saved === 'dark';
+    }
+    return window.matchMedia('(prefers-color-scheme: dark)').matches;
+  });
 
   // Antispam system for non-logged users
   const STORAGE_KEY = 'reportesCR_confirmedReports';
@@ -173,6 +183,22 @@ function App() {
       error
     });
   });
+
+  // Theme management effect
+  useEffect(() => {
+    if (isDarkMode) {
+      document.documentElement.classList.add('dark');
+      localStorage.setItem('theme', 'dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+      localStorage.setItem('theme', 'light');
+    }
+  }, [isDarkMode]);
+
+  // Toggle theme function
+  const toggleTheme = () => {
+    setIsDarkMode(!isDarkMode);
+  };
 
   useEffect(() => {
     console.log('Setting up auth listener...');
@@ -328,6 +354,18 @@ function App() {
               </span>
             </div>
             <div className="flex items-center space-x-2 sm:space-x-4 flex-shrink-0">
+              {/* Theme Toggle Button */}
+              <button
+                onClick={toggleTheme}
+                className="p-2 sm:p-2.5 rounded-lg sm:rounded-xl bg-white/10 dark:bg-gray-800/50 backdrop-blur-sm border border-gray-200 dark:border-gray-600 hover:bg-white/20 dark:hover:bg-gray-700/50 transition-all duration-200 shadow-md hover:shadow-lg"
+                title={isDarkMode ? 'Cambiar a modo claro' : 'Cambiar a modo oscuro'}
+              >
+                {isDarkMode ? (
+                  <span className="text-yellow-500 text-lg sm:text-xl">☀️</span>
+                ) : (
+                  <span className="text-gray-700 text-lg sm:text-xl">🌙</span>
+                )}
+              </button>
               {user ? (
                 <>
                   <div className="flex items-center space-x-2 sm:space-x-3 bg-white/10 dark:bg-gray-800/50 backdrop-blur-sm rounded-lg sm:rounded-xl px-2 sm:px-4 py-1 sm:py-2 border border-gray-200 dark:border-gray-600">
@@ -498,50 +536,50 @@ function App() {
                       <span className="text-gray-700 font-semibold">Total reportes</span>
                       <span className="text-red-600 font-bold text-xl">{reports.length}</span>
                     </div>
-                    <div className="bg-gradient-to-r from-green-50 to-green-100 p-4 rounded-xl flex justify-between items-center border-l-4 border-green-500">
-                      <span className="text-gray-700 font-medium">Tu ubicación:</span>
+                    <div className="bg-gradient-to-r from-green-50 to-green-100 dark:from-green-900/20 dark:to-green-900/10 p-4 rounded-xl flex justify-between items-center border-l-4 border-green-500">
+                      <span className="text-gray-700 dark:text-gray-300 font-medium">Tu ubicación:</span>
                       <span className={`font-bold ${userLocation ? 'text-green-600' : 'text-red-600'}`}>
                         {userLocation ? '📍 Detectada' : '❌ No disponible'}
                       </span>
                     </div>
-                    <div className="bg-emerald-50 p-3 rounded-lg flex justify-between items-center">
-                      <span className="text-gray-700 font-medium">Estado:</span>
+                    <div className="bg-emerald-50 dark:bg-emerald-900/20 p-3 rounded-lg flex justify-between items-center">
+                      <span className="text-gray-700 dark:text-gray-300 font-medium">Estado:</span>
                       <span className="font-bold text-emerald-600">✅ En línea</span>
                     </div>
                   </div>
                 </div>
 
                 {/* Map Legend */}
-                <div className="bg-white rounded-xl shadow-xl p-6">
-                  <h3 className="text-lg font-bold text-gray-800 mb-4 flex items-center">
+                <div className="bg-white dark:bg-gray-800 rounded-xl shadow-xl p-6">
+                  <h3 className="text-lg font-bold text-gray-800 dark:text-gray-200 mb-4 flex items-center">
                     <span className="mr-2">🗺️</span>
                     Leyenda del Mapa
                   </h3>
                   <div className="space-y-3">
-                    <div className="text-xs text-gray-600 mb-3">
+                    <div className="text-xs text-gray-600 dark:text-gray-300 mb-3">
                       <strong>Áreas Afectadas:</strong> Los círculos muestran las zonas con problemas reportados
                     </div>
                     
                     <div className="space-y-2">
                       <div className="flex items-center space-x-3">
                         <div className="w-4 h-4 rounded-full border-2 border-red-600 bg-red-600 bg-opacity-10"></div>
-                        <span className="text-sm text-gray-700">Electricidad</span>
+                        <span className="text-sm text-gray-700 dark:text-gray-300">Electricidad</span>
                       </div>
                       <div className="flex items-center space-x-3">
                         <div className="w-4 h-4 rounded-full border-2 border-blue-600 bg-blue-600 bg-opacity-10"></div>
-                        <span className="text-sm text-gray-700">Agua</span>
+                        <span className="text-sm text-gray-700 dark:text-gray-300">Agua</span>
                       </div>
                       <div className="flex items-center space-x-3">
                         <div className="w-4 h-4 rounded-full border-2 border-green-600 bg-green-600 bg-opacity-10"></div>
-                        <span className="text-sm text-gray-700">Internet</span>
+                        <span className="text-sm text-gray-700 dark:text-gray-300">Internet</span>
                       </div>
                       <div className="flex items-center space-x-3">
                         <div className="w-4 h-4 rounded-full border-2 border-orange-600 bg-orange-600 bg-opacity-10"></div>
-                        <span className="text-sm text-gray-700">Otros servicios</span>
+                        <span className="text-sm text-gray-700 dark:text-gray-300">Otros servicios</span>
                       </div>
                     </div>
                     
-                    <div className="text-xs text-gray-500 mt-3 pt-3 border-t">
+                    <div className="text-xs text-gray-500 dark:text-gray-400 mt-3 pt-3 border-t dark:border-gray-600">
                       💡 Cada círculo representa un área de ~500m de radio donde podría haber afectaciones
                     </div>
                   </div>
@@ -550,64 +588,64 @@ function App() {
             )}
 
             {/* Mobile Map Legend */}
-            <div className={`rounded-xl shadow-xl mt-6 bg-white p-6 ${activeTab !== 'legend' ? 'hidden' : 'lg:hidden'}`}>
-              <h3 className="text-lg font-bold text-gray-800 mb-4 flex items-center">
+            <div className={`rounded-xl shadow-xl mt-6 bg-white dark:bg-gray-800 p-6 ${activeTab !== 'legend' ? 'hidden' : 'lg:hidden'}`}>
+              <h3 className="text-lg font-bold text-gray-800 dark:text-gray-200 mb-4 flex items-center">
                 <span className="mr-2">🗺️</span>
                 Leyenda del Mapa
               </h3>
               
               <div className="space-y-4">
-                <div className="text-sm text-gray-600">
+                <div className="text-sm text-gray-600 dark:text-gray-300">
                   <strong>¿Qué significan los círculos en el mapa?</strong>
                 </div>
                 
-                <div className="bg-gray-50 p-4 rounded-lg">
-                  <p className="text-sm text-gray-700 mb-3">
+                <div className="bg-gray-50 dark:bg-gray-700 p-4 rounded-lg">
+                  <p className="text-sm text-gray-700 dark:text-gray-300 mb-3">
                     Los círculos coloreados muestran las <strong>áreas afectadas</strong> alrededor de cada reporte. 
                     Cada círculo tiene un radio de aproximadamente 500 metros.
                   </p>
                 </div>
                 
                 <div className="space-y-3">
-                  <div className="text-sm font-semibold text-gray-700 mb-2">Colores por tipo de servicio:</div>
+                  <div className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Colores por tipo de servicio:</div>
                   
                   <div className="space-y-2">
-                    <div className="flex items-center space-x-3 p-2 bg-red-50 rounded">
+                    <div className="flex items-center space-x-3 p-2 bg-red-50 dark:bg-red-900/20 rounded">
                       <div className="w-6 h-6 rounded-full border-2 border-red-600 bg-red-600 bg-opacity-20"></div>
                       <div>
-                        <span className="text-sm font-medium text-gray-800">Electricidad</span>
-                        <div className="text-xs text-gray-600">Cortes de luz, problemas eléctricos</div>
+                        <span className="text-sm font-medium text-gray-800 dark:text-gray-200">Electricidad</span>
+                        <div className="text-xs text-gray-600 dark:text-gray-400">Cortes de luz, problemas eléctricos</div>
                       </div>
                     </div>
                     
-                    <div className="flex items-center space-x-3 p-2 bg-blue-50 rounded">
+                    <div className="flex items-center space-x-3 p-2 bg-blue-50 dark:bg-blue-900/20 rounded">
                       <div className="w-6 h-6 rounded-full border-2 border-blue-600 bg-blue-600 bg-opacity-20"></div>
                       <div>
-                        <span className="text-sm font-medium text-gray-800">Agua</span>
-                        <div className="text-xs text-gray-600">Cortes de agua, problemas de abastecimiento</div>
+                        <span className="text-sm font-medium text-gray-800 dark:text-gray-200">Agua</span>
+                        <div className="text-xs text-gray-600 dark:text-gray-400">Cortes de agua, problemas de abastecimiento</div>
                       </div>
                     </div>
                     
-                    <div className="flex items-center space-x-3 p-2 bg-green-50 rounded">
+                    <div className="flex items-center space-x-3 p-2 bg-green-50 dark:bg-green-900/20 rounded">
                       <div className="w-6 h-6 rounded-full border-2 border-green-600 bg-green-600 bg-opacity-20"></div>
                       <div>
-                        <span className="text-sm font-medium text-gray-800">Internet</span>
-                        <div className="text-xs text-gray-600">Fallas de conexión, problemas de red</div>
+                        <span className="text-sm font-medium text-gray-800 dark:text-gray-200">Internet</span>
+                        <div className="text-xs text-gray-600 dark:text-gray-400">Fallas de conexión, problemas de red</div>
                       </div>
                     </div>
                     
-                    <div className="flex items-center space-x-3 p-2 bg-orange-50 rounded">
+                    <div className="flex items-center space-x-3 p-2 bg-orange-50 dark:bg-orange-900/20 rounded">
                       <div className="w-6 h-6 rounded-full border-2 border-orange-600 bg-orange-600 bg-opacity-20"></div>
                       <div>
-                        <span className="text-sm font-medium text-gray-800">Otros servicios</span>
-                        <div className="text-xs text-gray-600">Teléfono, cable, otros servicios públicos</div>
+                        <span className="text-sm font-medium text-gray-800 dark:text-gray-200">Otros servicios</span>
+                        <div className="text-xs text-gray-600 dark:text-gray-400">Teléfono, cable, otros servicios públicos</div>
                       </div>
                     </div>
                   </div>
                 </div>
                 
-                <div className="bg-blue-50 p-3 rounded-lg">
-                  <div className="text-xs text-blue-800">
+                <div className="bg-blue-50 dark:bg-blue-900/20 p-3 rounded-lg">
+                  <div className="text-xs text-blue-800 dark:text-blue-300">
                     <strong>💡 Tip:</strong> Si ves un círculo cerca de tu ubicación, es posible que también experimentes problemas con ese servicio.
                   </div>
                 </div>
@@ -709,14 +747,14 @@ function App() {
                     <span className="text-gray-700 font-semibold">Total reportes</span>
                     <span className="text-red-600 font-bold text-xl">{reports.length}</span>
                   </div>
-                  <div className="bg-gradient-to-r from-green-50 to-green-100 p-4 rounded-xl flex justify-between items-center border-l-4 border-green-500">
-                    <span className="text-gray-700 font-semibold">Tu ubicación</span>
+                  <div className="bg-gradient-to-r from-green-50 to-green-100 dark:from-green-900/20 dark:to-green-900/10 p-4 rounded-xl flex justify-between items-center border-l-4 border-green-500">
+                    <span className="text-gray-700 dark:text-gray-300 font-semibold">Tu ubicación</span>
                     <span className={`font-bold ${userLocation ? 'text-green-600' : 'text-red-600'}`}>
                       {userLocation ? '📍 Detectada' : '❌ No disponible'}
                     </span>
                   </div>
-                  <div className="bg-gradient-to-r from-emerald-50 to-emerald-100 p-4 rounded-xl flex justify-between items-center border-l-4 border-emerald-500">
-                    <span className="text-gray-700 font-semibold">Estado del servicio</span>
+                  <div className="bg-gradient-to-r from-emerald-50 to-emerald-100 dark:from-emerald-900/20 dark:to-emerald-900/10 p-4 rounded-xl flex justify-between items-center border-l-4 border-emerald-500">
+                    <span className="text-gray-700 dark:text-gray-300 font-semibold">Estado del servicio</span>
                     <span className="font-bold text-emerald-600 status-online px-2 py-1 rounded-lg">✅ En línea</span>
                   </div>
                 </div>
