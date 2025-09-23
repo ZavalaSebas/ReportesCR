@@ -30,11 +30,30 @@ const serviceIcons = {
   otros: createIcon('orange')
 };
 
+// Helper function to get service icon safely
+const getServiceIcon = (serviceType) => {
+  if (!serviceType) return serviceIcons.otros; // Default icon
+  
+  // Normalize service type to lowercase for matching
+  const normalizedType = serviceType.toLowerCase();
+  return serviceIcons[normalizedType] || serviceIcons.otros; // Default to 'otros' icon for unrecognized types
+};
+
 const serviceColors = {
   luz: 'text-red-600',
   agua: 'text-blue-600', 
   internet: 'text-green-600',
-  otros: 'text-orange-600'
+  otros: 'text-orange-600',
+  default: 'text-gray-600'
+};
+
+// Helper function to get service color safely
+const getServiceColor = (serviceType) => {
+  if (!serviceType) return serviceColors.default;
+  
+  // Normalize service type to lowercase for matching
+  const normalizedType = serviceType.toLowerCase();
+  return serviceColors[normalizedType] || serviceColors.default;
 };
 
 // Circle colors and styles for each service type
@@ -67,6 +86,15 @@ const circleStyles = {
     weight: 3,
     radius: 800
   }
+};
+
+// Helper function to get circle style safely
+const getCircleStyle = (serviceType) => {
+  if (!serviceType) return circleStyles.otros;
+  
+  // Normalize service type to lowercase for matching
+  const normalizedType = serviceType.toLowerCase();
+  return circleStyles[normalizedType] || circleStyles.otros;
 };
 
 // Component to handle map clicks for location selection
@@ -270,7 +298,7 @@ const MapView = ({
           }
           
           const position = [latitude, longitude];
-          const circleStyle = circleStyles[report.serviceType] || circleStyles.otros;
+          const circleStyle = getCircleStyle(report.serviceType);
           
           console.log('Rendering circle and marker at:', position, 'with style:', circleStyle);
           
@@ -291,7 +319,7 @@ const MapView = ({
                 <Popup>
                   <div className="p-2 text-center">
                     <div className="mb-3">
-                      <span className={`font-bold ${serviceColors[report.serviceType]} capitalize`}>
+                      <span className={`font-bold ${getServiceColor(report.serviceType)} capitalize`}>
                         Zona afectada - {report.serviceType}
                       </span>
                       <div className="text-sm text-gray-600 mt-1">
@@ -377,12 +405,12 @@ const MapView = ({
               {/* Report marker */}
               <Marker
                 position={position}
-                icon={serviceIcons[report.serviceType] || serviceIcons.otros}
+                icon={getServiceIcon(report.serviceType)}
               >
                 <Popup>
                   <div className="p-2 max-w-xs">
                     <div className="flex items-center mb-2">
-                      <span className={`font-bold text-lg ${serviceColors[report.serviceType]} capitalize`}>
+                      <span className={`font-bold text-lg ${getServiceColor(report.serviceType)} capitalize`}>
                         {report.serviceType}
                       </span>
                     </div>

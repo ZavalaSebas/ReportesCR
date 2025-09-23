@@ -4,6 +4,8 @@ import { auth, loginWithGoogle, logout, subscribeToReports, confirmReport, merge
 import MapView from './components/MapView';
 import ReportForm from './components/ReportForm';
 import ReportList from './components/ReportList';
+import ServiceStatus from './components/ServiceStatus';
+import NearbyReports from './components/NearbyReports';
 import './App.css';
 
 function App() {
@@ -361,6 +363,10 @@ function App() {
       </header>
 
       <div className="w-full px-6 sm:px-8 lg:px-12 py-8">
+        
+        {/* Service Status Cards */}
+        <ServiceStatus reports={reports} />
+        
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
           
           {/* Main Content - 3 columns */}
@@ -535,6 +541,13 @@ function App() {
 
           {/* Sidebar - 1 column */}
           <div className="lg:col-span-1 space-y-6">
+            
+            {/* Nearby Reports */}
+            <NearbyReports 
+              reports={reports} 
+              userLocation={userLocation} 
+              user={user} 
+            />
             
             {/* Create Report Form */}
             <div className={activeTab !== 'create' ? 'hidden lg:block' : ''}>

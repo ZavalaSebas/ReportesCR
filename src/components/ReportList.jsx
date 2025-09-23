@@ -5,7 +5,24 @@ const serviceColors = {
   luz: 'bg-red-100 text-red-800 border-red-200',
   agua: 'bg-blue-100 text-blue-800 border-blue-200',
   internet: 'bg-green-100 text-green-800 border-green-200',
-  otros: 'bg-orange-100 text-orange-800 border-orange-200'
+  otros: 'bg-yellow-100 text-yellow-800 border-yellow-200',
+  // Default fallback color for any unrecognized service types
+  default: 'bg-gray-100 text-gray-800 border-gray-200'
+};
+
+// Helper function to get service color safely
+const getServiceColor = (serviceType) => {
+  if (!serviceType) return serviceColors.default;
+  
+  // Normalize service type: trim whitespace and convert to lowercase
+  const normalizedType = serviceType.toString().trim().toLowerCase();
+  
+  // Handle edge cases for "otros"
+  if (normalizedType === 'otros' || normalizedType === 'otro' || normalizedType.includes('otro')) {
+    return serviceColors.otros;
+  }
+  
+  return serviceColors[normalizedType] || serviceColors.default;
 };
 
 const serviceIcons = {
@@ -13,6 +30,15 @@ const serviceIcons = {
   agua: '💧',
   internet: '🌐',
   otros: '🔧'
+};
+
+// Helper function to get service icon safely
+const getServiceIcon = (serviceType) => {
+  if (!serviceType) return '📋'; // Default icon
+  
+  // Normalize service type to lowercase for matching
+  const normalizedType = serviceType.toLowerCase();
+  return serviceIcons[normalizedType] || '📋'; // Default icon for unrecognized types
 };
 
 // Helper function to format provider display
@@ -128,10 +154,10 @@ const ReportList = ({ reports, user }) => {
               {/* Header */}
               <div className="flex items-start justify-between mb-3">
                 <div className="flex items-center space-x-2">
-                  <span className="text-2xl">{serviceIcons[report.serviceType]}</span>
+                  <span className="text-2xl">{getServiceIcon(report.serviceType)}</span>
                   <div>
                     <span className={`inline-block px-2 py-1 text-xs font-semibold rounded-full border ${
-                      serviceColors[report.serviceType] || serviceColors.otros
+                      getServiceColor(report.serviceType)
                     }`}>
                       {report.serviceType?.charAt(0).toUpperCase() + report.serviceType?.slice(1)}
                     </span>
