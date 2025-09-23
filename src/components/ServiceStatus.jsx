@@ -93,10 +93,10 @@ const ServiceStatus = ({ reports }) => {
           <span className="text-white text-lg">🏠</span>
         </div>
         <div>
-          <h2 className="text-2xl font-bold bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent">
+          <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100">
             Estado de Servicios Públicos
           </h2>
-          <p className="text-gray-600 text-sm">Monitoreo en tiempo real de incidencias</p>
+          <p className="text-gray-600 dark:text-gray-400 text-sm">Monitoreo en tiempo real de incidencias</p>
         </div>
       </div>
       

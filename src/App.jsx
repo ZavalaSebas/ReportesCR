@@ -310,7 +310,7 @@ function App() {
   console.log('App: Rendering main application state');
   return (
     <div className="min-h-screen gradient-bg">
-      <header className="glass-card border-b border-white/20 sticky top-0 z-50">
+      <header className="glass-card border-b border-gray-200 dark:border-gray-700 sticky top-0 z-50">
         <div className="w-full px-3 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center py-4 lg:py-6">
             <div className="flex items-center space-x-2 sm:space-x-4 min-w-0 flex-1">
@@ -318,31 +318,31 @@ function App() {
                 <span className="text-white font-bold text-lg sm:text-2xl">🇨🇷</span>
               </div>
               <div className="min-w-0 flex-1">
-                <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent truncate">
+                <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold heading-primary truncate">
                   ReportesCR
                 </h1>
-                <p className="text-gray-600 font-medium text-xs sm:text-sm hidden sm:block">Sistema Nacional de Reportes</p>
+                <p className="text-gray-600 dark:text-gray-300 font-medium text-xs sm:text-sm hidden sm:block">Sistema Nacional de Reportes</p>
               </div>
-              <span className="hidden lg:inline-block ml-2 px-2 sm:px-3 py-1 bg-gradient-to-r from-red-100 to-red-50 text-red-700 text-xs font-semibold rounded-full border border-red-200 flex-shrink-0">
+              <span className="hidden lg:inline-block ml-2 px-2 sm:px-3 py-1 bg-gradient-to-r from-red-100 to-red-50 dark:from-red-900/30 dark:to-red-800/30 text-red-700 dark:text-red-300 text-xs font-semibold rounded-full border border-red-200 dark:border-red-700 flex-shrink-0">
                 BETA v1.0
               </span>
             </div>
             <div className="flex items-center space-x-2 sm:space-x-4 flex-shrink-0">
               {user ? (
                 <>
-                  <div className="flex items-center space-x-2 sm:space-x-3 bg-white/10 backdrop-blur-sm rounded-lg sm:rounded-xl px-2 sm:px-4 py-1 sm:py-2 border border-white/20">
+                  <div className="flex items-center space-x-2 sm:space-x-3 bg-white/10 dark:bg-gray-800/50 backdrop-blur-sm rounded-lg sm:rounded-xl px-2 sm:px-4 py-1 sm:py-2 border border-gray-200 dark:border-gray-600">
                     {user.photoURL && (
                       <img 
                         src={user.photoURL} 
                         alt="Foto de perfil"
-                        className="w-8 h-8 sm:w-10 sm:h-10 rounded-full border-2 border-white/30 shadow-md"
+                        className="w-8 h-8 sm:w-10 sm:h-10 rounded-full border-2 border-gray-300 dark:border-gray-600 shadow-md"
                       />
                     )}
                     <div className="hidden sm:block">
-                      <span className="text-gray-800 font-semibold text-sm block">
+                      <span className="text-gray-800 dark:text-gray-200 font-semibold text-sm block">
                         {user.displayName || 'Usuario'}
                       </span>
-                      <span className="text-gray-600 text-xs">
+                      <span className="text-gray-600 dark:text-gray-400 text-xs">
                         {user.email}
                       </span>
                     </div>
@@ -386,7 +386,7 @@ function App() {
             
             {/* Mobile Tab Navigation */}
             <div className="lg:hidden modern-card mb-6 p-1">
-              <nav className="flex rounded-lg bg-gray-50">
+              <nav className="flex rounded-lg bg-gray-50 dark:bg-gray-800">
                 {[
                   { key: 'map', label: 'Mapa', icon: '🗺️' },
                   { key: 'create', label: 'Crear', icon: '➕' },
@@ -397,8 +397,8 @@ function App() {
                     onClick={() => setActiveTab(tab.key)}
                     className={`flex-1 flex items-center justify-center py-3 px-2 text-sm font-semibold rounded-md transition-all duration-200 ${
                       activeTab === tab.key
-                        ? 'bg-white text-red-600 shadow-md'
-                        : 'text-gray-600 hover:text-gray-800 hover:bg-white/50'
+                        ? 'bg-white dark:bg-gray-700 text-red-600 dark:text-red-400 shadow-md'
+                        : 'text-gray-600 dark:text-gray-300 hover:text-gray-800 dark:hover:text-gray-100 hover:bg-white/50 dark:hover:bg-gray-700/50'
                     }`}
                   >
                     <span className="mr-1">{tab.icon}</span>
