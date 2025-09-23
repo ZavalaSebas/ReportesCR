@@ -462,8 +462,8 @@ function App() {
                   }}
                 />
               ) : (
-                <div className="h-96 bg-gray-200 flex items-center justify-center">
-                  <p className="text-gray-600">⏳ Esperando ubicación para mostrar mapa...</p>
+                <div className="h-80 md:h-96 lg:h-[500px] bg-gray-200 dark:bg-gray-700 flex items-center justify-center rounded-lg">
+                  <p className="text-gray-600 dark:text-gray-300">⏳ Esperando ubicación para mostrar mapa...</p>
                 </div>
               )}
             </div>

@@ -190,14 +190,14 @@ const MapView = ({
   // Don't render if we don't have proper coordinates
   if (!center || !Array.isArray(center) || center.length !== 2) {
     return (
-      <div className="w-full h-64 md:h-96 lg:h-[500px] rounded-lg overflow-hidden shadow-lg bg-gray-200 flex items-center justify-center">
-        <p className="text-gray-600">Cargando mapa...</p>
+      <div className="w-full h-80 md:h-96 lg:h-[500px] rounded-lg overflow-hidden shadow-lg bg-gray-200 dark:bg-gray-700 flex items-center justify-center">
+        <p className="text-gray-600 dark:text-gray-300">Cargando mapa...</p>
       </div>
     );
   }
 
   return (
-    <div className="w-full h-64 md:h-96 lg:h-[500px] rounded-lg overflow-hidden shadow-lg relative">
+    <div className="w-full h-80 md:h-96 lg:h-[500px] rounded-lg overflow-hidden shadow-lg relative">
       {/* Selection mode indicator */}
       {isLocationSelectionMode && (
         <div className="absolute top-4 left-4 right-4 z-[1000] bg-purple-600 text-white px-4 py-2 rounded-lg shadow-lg">
@@ -317,33 +317,35 @@ const MapView = ({
               >
                 {/* Popup for circles (always show for interaction) */}
                 <Popup>
-                  <div className="p-2 text-center">
-                    <div className="mb-3">
-                      <span className={`font-bold ${getServiceColor(report.serviceType)} capitalize`}>
-                        Zona afectada - {report.serviceType}
+                  <div className="p-1 sm:p-2 text-center max-w-xs">
+                    <div className="mb-2 sm:mb-3">
+                      <span className={`font-bold ${getServiceColor(report.serviceType)} capitalize text-sm`}>
+                        {report.serviceType}
                       </span>
-                      <div className="text-sm text-gray-600 mt-1">
+                      <div className="text-xs sm:text-sm text-gray-600 dark:text-gray-400 mt-1">
                         {formatProviders(report.provider).isMerged ? (
-                          <div className="bg-yellow-50 p-2 rounded">
-                            <div className="font-medium text-yellow-800 mb-1">
-                              {formatProviders(report.provider).providers.length} proveedores afectados:
+                          <div className="bg-yellow-50 dark:bg-yellow-900/20 p-1 sm:p-2 rounded">
+                            <div className="font-medium text-yellow-800 dark:text-yellow-300 mb-1 text-xs">
+                              {formatProviders(report.provider).providers.length} proveedores
                             </div>
-                            <div className="space-y-1">
-                              {formatProviders(report.provider).providers.map((provider, index) => (
-                                <div key={index} className="flex items-center justify-center space-x-1">
-                                  <span className="w-1.5 h-1.5 bg-yellow-500 rounded-full"></span>
-                                  <span className="text-xs">{provider}</span>
+                            <div className="space-y-0.5">
+                              {formatProviders(report.provider).providers.slice(0, 2).map((provider, index) => (
+                                <div key={index} className="text-xs">
+                                  • {provider.length > 15 ? provider.substring(0, 15) + '...' : provider}
                                 </div>
                               ))}
+                              {formatProviders(report.provider).providers.length > 2 && (
+                                <div className="text-xs text-gray-500">+{formatProviders(report.provider).providers.length - 2} más</div>
+                              )}
                             </div>
                           </div>
                         ) : (
-                          report.provider
+                          <span className="text-xs">{report.provider?.length > 20 ? report.provider.substring(0, 20) + '...' : report.provider}</span>
                         )}
                       </div>
                     </div>
                     
-                    <div className="space-y-2">
+                    <div className="space-y-1 sm:space-y-2">
                       {/* Confirmation button (always visible) */}
                       <button
                         onClick={async (e) => {
@@ -370,17 +372,17 @@ const MapView = ({
                           (user && report.confirmed_by && report.confirmed_by.includes(user.uid)) ||
                           (!user && hasConfirmedReport && hasConfirmedReport(report.id))
                         }
-                        className={`w-full px-3 py-2 rounded text-sm font-medium transition-colors ${
+                        className={`w-full px-2 sm:px-3 py-1 sm:py-2 rounded text-xs sm:text-sm font-medium transition-colors ${
                           (user && report.confirmed_by && report.confirmed_by.includes(user.uid)) ||
                           (!user && hasConfirmedReport && hasConfirmedReport(report.id))
-                            ? 'bg-gray-400 text-gray-600 cursor-not-allowed'
+                            ? 'bg-gray-400 dark:bg-gray-600 text-gray-600 dark:text-gray-300 cursor-not-allowed'
                             : 'bg-green-600 hover:bg-green-700 text-white'
                         }`}
                       >
                         {(user && report.confirmed_by && report.confirmed_by.includes(user.uid)) ||
                          (!user && hasConfirmedReport && hasConfirmedReport(report.id))
-                          ? '✅ Ya confirmado'
-                          : '✅ Confirmar este reporte'
+                          ? '✅ Confirmado'
+                          : '✅ Confirmar'
                         }
                       </button>
                       
@@ -392,9 +394,9 @@ const MapView = ({
                             console.log('🎯 Using location from circle:', { latitude, longitude, report });
                             handleSmartConfirmation(report, latitude, longitude);
                           }}
-                          className="w-full bg-purple-600 hover:bg-purple-700 text-white px-3 py-2 rounded text-sm font-medium transition-colors"
+                          className="w-full bg-purple-600 hover:bg-purple-700 text-white px-2 sm:px-3 py-1 sm:py-2 rounded text-xs sm:text-sm font-medium transition-colors"
                         >
-                          📍 Marcar aquí mi reporte
+                          📍 Marcar aquí
                         </button>
                       )}
                     </div>
