@@ -311,34 +311,34 @@ function App() {
   return (
     <div className="min-h-screen gradient-bg">
       <header className="glass-card border-b border-white/20 sticky top-0 z-50">
-        <div className="w-full px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center py-6">
-            <div className="flex items-center space-x-4">
-              <div className="w-14 h-14 bg-gradient-to-br from-red-600 to-red-700 rounded-2xl flex items-center justify-center shadow-xl">
-                <span className="text-white font-bold text-2xl">🇨🇷</span>
+        <div className="w-full px-3 sm:px-6 lg:px-8">
+          <div className="flex justify-between items-center py-4 lg:py-6">
+            <div className="flex items-center space-x-2 sm:space-x-4 min-w-0 flex-1">
+              <div className="w-10 h-10 sm:w-14 sm:h-14 bg-gradient-to-br from-red-600 to-red-700 rounded-xl sm:rounded-2xl flex items-center justify-center shadow-xl flex-shrink-0">
+                <span className="text-white font-bold text-lg sm:text-2xl">🇨🇷</span>
               </div>
-              <div>
-                <h1 className="text-3xl font-bold bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent">
+              <div className="min-w-0 flex-1">
+                <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent truncate">
                   ReportesCR
                 </h1>
-                <p className="text-gray-600 font-medium text-sm">Sistema Nacional de Reportes</p>
+                <p className="text-gray-600 font-medium text-xs sm:text-sm hidden sm:block">Sistema Nacional de Reportes</p>
               </div>
-              <span className="ml-4 px-3 py-1 bg-gradient-to-r from-red-100 to-red-50 text-red-700 text-xs font-semibold rounded-full border border-red-200">
+              <span className="hidden lg:inline-block ml-2 px-2 sm:px-3 py-1 bg-gradient-to-r from-red-100 to-red-50 text-red-700 text-xs font-semibold rounded-full border border-red-200 flex-shrink-0">
                 BETA v1.0
               </span>
             </div>
-            <div className="flex items-center space-x-4">
+            <div className="flex items-center space-x-2 sm:space-x-4 flex-shrink-0">
               {user ? (
                 <>
-                  <div className="flex items-center space-x-3 bg-white/10 backdrop-blur-sm rounded-xl px-4 py-2 border border-white/20">
+                  <div className="flex items-center space-x-2 sm:space-x-3 bg-white/10 backdrop-blur-sm rounded-lg sm:rounded-xl px-2 sm:px-4 py-1 sm:py-2 border border-white/20">
                     {user.photoURL && (
                       <img 
                         src={user.photoURL} 
                         alt="Foto de perfil"
-                        className="w-10 h-10 rounded-full border-2 border-white/30 shadow-md"
+                        className="w-8 h-8 sm:w-10 sm:h-10 rounded-full border-2 border-white/30 shadow-md"
                       />
                     )}
-                    <div>
+                    <div className="hidden sm:block">
                       <span className="text-gray-800 font-semibold text-sm block">
                         {user.displayName || 'Usuario'}
                       </span>
@@ -349,15 +349,16 @@ function App() {
                   </div>
                   <button
                     onClick={handleLogout}
-                    className="bg-red-600 hover:bg-red-700 text-white py-2.5 px-5 rounded-xl font-semibold transition-all duration-200 shadow-lg hover:shadow-xl hover:scale-105"
+                    className="bg-red-600 hover:bg-red-700 text-white py-2 px-3 sm:py-2.5 sm:px-5 rounded-lg sm:rounded-xl font-semibold transition-all duration-200 shadow-lg hover:shadow-xl hover:scale-105 text-sm sm:text-base"
                   >
-                    Cerrar Sesión
+                    <span className="hidden sm:inline">Cerrar Sesión</span>
+                    <span className="sm:hidden">Salir</span>
                   </button>
                 </>
               ) : (
                 <button
                   onClick={handleLogin}
-                  className="btn-primary flex items-center space-x-2 font-semibold"
+                  className="btn-primary flex items-center space-x-1 sm:space-x-2 font-semibold text-sm sm:text-base px-3 sm:px-4"
                 >
                   <svg className="w-4 h-4" viewBox="0 0 24 24">
                     <path fill="currentColor" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
