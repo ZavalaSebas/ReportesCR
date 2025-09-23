@@ -28,10 +28,18 @@ function App() {
   const [isDarkMode, setIsDarkMode] = useState(() => {
     // Check if user has a saved preference, otherwise use system preference
     const saved = localStorage.getItem('theme');
+    const systemPrefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    
+    console.log('Theme initialization:', { 
+      saved, 
+      systemPrefersDark,
+      willUseDark: saved ? saved === 'dark' : systemPrefersDark
+    });
+    
     if (saved) {
       return saved === 'dark';
     }
-    return window.matchMedia('(prefers-color-scheme: dark)').matches;
+    return systemPrefersDark;
   });
 
   // Antispam system for non-logged users
@@ -180,24 +188,35 @@ function App() {
     console.log('App component mounted/updated', {
       user: user ? 'logged in' : 'not logged in',
       loading,
-      error
+      error,
+      isDarkMode,
+      htmlClasses: document.documentElement.classList.toString()
     });
   });
 
   // Theme management effect
   useEffect(() => {
+    console.log('Theme useEffect triggered:', { isDarkMode });
     if (isDarkMode) {
       document.documentElement.classList.add('dark');
       localStorage.setItem('theme', 'dark');
+      console.log('Applied dark mode, HTML classes:', document.documentElement.classList.toString());
     } else {
       document.documentElement.classList.remove('dark');
       localStorage.setItem('theme', 'light');
+      console.log('Applied light mode, HTML classes:', document.documentElement.classList.toString());
     }
   }, [isDarkMode]);
 
   // Toggle theme function
   const toggleTheme = () => {
+    console.log('Toggling theme from:', isDarkMode, 'to:', !isDarkMode);
     setIsDarkMode(!isDarkMode);
+  };
+
+  // Beta click handler
+  const handleBetaClick = () => {
+    alert('🚧 BETA v1.0\n\nEsta aplicación está en fase de pruebas.\n\n✅ Funciones disponibles:\n• Visualización de reportes en mapa\n• Creación de nuevos reportes\n• Sistema de confirmación de reportes\n• Modo oscuro/claro\n\n⚠️ Conocidos por mejorar:\n• Optimización de rendimiento\n• Validaciones de formularios\n• Filtros avanzados\n\n¡Gracias por tu paciencia mientras mejoramos la plataforma!');
   };
 
   useEffect(() => {
@@ -349,9 +368,13 @@ function App() {
                 </h1>
                 <p className="text-gray-600 dark:text-gray-300 font-medium text-xs sm:text-sm hidden sm:block">Sistema Nacional de Reportes</p>
               </div>
-              <span className="hidden lg:inline-block ml-2 px-2 sm:px-3 py-1 bg-gradient-to-r from-red-100 to-red-50 dark:from-red-900/30 dark:to-red-800/30 text-red-700 dark:text-red-300 text-xs font-semibold rounded-full border border-red-200 dark:border-red-700 flex-shrink-0">
+              <button 
+                onClick={handleBetaClick}
+                className="hidden lg:inline-block ml-2 px-2 sm:px-3 py-1 bg-gradient-to-r from-red-100 to-red-50 dark:from-red-900/30 dark:to-red-800/30 text-red-700 dark:text-red-300 text-xs font-semibold rounded-full border border-red-200 dark:border-red-700 flex-shrink-0 hover:from-red-200 hover:to-red-100 dark:hover:from-red-800/40 dark:hover:to-red-700/40 transition-all duration-200 cursor-pointer"
+                title="Información sobre la versión BETA"
+              >
                 BETA v1.0
-              </span>
+              </button>
             </div>
             <div className="flex items-center space-x-2 sm:space-x-4 flex-shrink-0">
               {/* Theme Toggle Button */}
@@ -423,8 +446,10 @@ function App() {
           <div className="lg:col-span-3">
             
             {/* Mobile Tab Navigation */}
-            <div className="lg:hidden modern-card mb-6 p-1">
-              <nav className="flex rounded-lg bg-gray-50 dark:bg-gray-800">
+            <div className="lg:hidden mb-6 p-1 bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-gray-200 dark:border-gray-600" 
+                 style={{ background: isDarkMode ? '#1e293b' : '#ffffff' }}>
+              <nav className="flex rounded-lg" 
+                   style={{ background: isDarkMode ? '#374151' : '#f9fafb' }}>
                 {[
                   { key: 'map', label: 'Mapa', icon: '🗺️' },
                   { key: 'create', label: 'Crear', icon: '➕' },
@@ -433,11 +458,28 @@ function App() {
                   <button
                     key={tab.key}
                     onClick={() => setActiveTab(tab.key)}
-                    className={`flex-1 flex items-center justify-center py-3 px-2 text-sm font-semibold rounded-md transition-all duration-200 ${
-                      activeTab === tab.key
-                        ? 'bg-white dark:bg-gray-700 text-red-600 dark:text-red-400 shadow-md'
-                        : 'text-gray-600 dark:text-gray-300 hover:text-gray-800 dark:hover:text-gray-100 hover:bg-white/50 dark:hover:bg-gray-700/50'
-                    }`}
+                    className={`flex-1 flex items-center justify-center py-3 px-2 text-sm font-semibold rounded-md transition-all duration-200`}
+                    style={{
+                      backgroundColor: activeTab === tab.key 
+                        ? (isDarkMode ? '#4b5563' : '#ffffff') 
+                        : 'transparent',
+                      color: activeTab === tab.key 
+                        ? (isDarkMode ? '#f87171' : '#dc2626')
+                        : (isDarkMode ? '#d1d5db' : '#6b7280'),
+                      ...(activeTab === tab.key && { boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' })
+                    }}
+                    onMouseEnter={(e) => {
+                      if (activeTab !== tab.key) {
+                        e.target.style.backgroundColor = isDarkMode ? '#374151' : 'rgba(255, 255, 255, 0.5)';
+                        e.target.style.color = isDarkMode ? '#f3f4f6' : '#374151';
+                      }
+                    }}
+                    onMouseLeave={(e) => {
+                      if (activeTab !== tab.key) {
+                        e.target.style.backgroundColor = 'transparent'; 
+                        e.target.style.color = isDarkMode ? '#d1d5db' : '#6b7280';
+                      }
+                    }}
                   >
                     <span className="mr-1">{tab.icon}</span>
                     {tab.label}
