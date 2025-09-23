@@ -680,6 +680,70 @@ function App() {
 
 
             
+            {/* Stats - Desktop only, in sidebar when NOT logged in */}
+            {!user && (
+              <div className="hidden lg:block bg-white rounded-xl shadow-xl p-6">
+                <h3 className="text-lg font-bold text-gray-800 mb-4 flex items-center">
+                  <span className="mr-2">📊</span>
+                  Estado del Sistema
+                </h3>
+                <div className="space-y-4">
+                  <div className="bg-red-50 p-3 rounded-lg flex justify-between items-center">
+                    <span className="text-gray-700 font-medium">Total reportes:</span>
+                    <span className="text-red-600 font-bold text-lg">{reports.length}</span>
+                  </div>
+                  <div className="bg-green-50 p-3 rounded-lg flex justify-between items-center">
+                    <span className="text-gray-700 font-medium">Tu ubicación:</span>
+                    <span className={`font-bold ${userLocation ? 'text-green-600' : 'text-red-600'}`}>
+                      {userLocation ? '📍 Detectada' : '❌ No disponible'}
+                    </span>
+                  </div>
+                  <div className="bg-emerald-50 p-3 rounded-lg flex justify-between items-center">
+                    <span className="text-gray-700 font-medium">Estado:</span>
+                    <span className="font-bold text-emerald-600">✅ En línea</span>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Map Legend - Desktop only, in sidebar when NOT logged in */}
+            {!user && (
+              <div className="hidden lg:block bg-white rounded-xl shadow-xl p-6">
+                <h3 className="text-lg font-bold text-gray-800 mb-4 flex items-center">
+                  <span className="mr-2">🗺️</span>
+                  Leyenda del Mapa
+                </h3>
+                <div className="space-y-3">
+                  <div className="text-xs text-gray-600 mb-3">
+                    <strong>Áreas Afectadas:</strong> Los círculos muestran las zonas con problemas reportados
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <div className="flex items-center space-x-3">
+                      <div className="w-4 h-4 rounded-full border-2 border-red-600 bg-red-600 bg-opacity-10"></div>
+                      <span className="text-sm text-gray-700">Electricidad</span>
+                    </div>
+                    <div className="flex items-center space-x-3">
+                      <div className="w-4 h-4 rounded-full border-2 border-blue-600 bg-blue-600 bg-opacity-10"></div>
+                      <span className="text-sm text-gray-700">Agua</span>
+                    </div>
+                    <div className="flex items-center space-x-3">
+                      <div className="w-4 h-4 rounded-full border-2 border-green-600 bg-green-600 bg-opacity-10"></div>
+                      <span className="text-sm text-gray-700">Internet</span>
+                    </div>
+                    <div className="flex items-center space-x-3">
+                      <div className="w-4 h-4 rounded-full border-2 border-orange-600 bg-orange-600 bg-opacity-10"></div>
+                      <span className="text-sm text-gray-700">Otros servicios</span>
+                    </div>
+                  </div>
+                  
+                  <div className="text-xs text-gray-500 mt-3 pt-3 border-t">
+                    💡 Cada círculo representa un área de ~500m de radio donde podría haber afectaciones
+                  </div>
+                </div>
+              </div>
+            )}
+            
           </div>
         </div>
       </div>
