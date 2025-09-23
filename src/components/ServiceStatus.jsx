@@ -88,14 +88,19 @@ const ServiceStatus = ({ reports }) => {
 
   return (
     <div className="mb-8">
-      <div className="flex items-center mb-4">
-        <h2 className="text-xl font-bold text-gray-800 flex items-center">
-          <span className="mr-2">🏠</span>
-          Estado de Servicios
-        </h2>
+      <div className="flex items-center mb-6">
+        <div className="w-10 h-10 bg-gradient-to-br from-indigo-500 to-indigo-600 rounded-xl flex items-center justify-center mr-4">
+          <span className="text-white text-lg">🏠</span>
+        </div>
+        <div>
+          <h2 className="text-2xl font-bold bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent">
+            Estado de Servicios Públicos
+          </h2>
+          <p className="text-gray-600 text-sm">Monitoreo en tiempo real de incidencias</p>
+        </div>
       </div>
       
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         {Object.entries(services).map(([key, service]) => {
           const level = getStatusLevel(service.count);
           const statusText = getStatusText(service.count);
@@ -103,23 +108,23 @@ const ServiceStatus = ({ reports }) => {
           return (
             <div
               key={key}
-              className={`p-3 rounded-lg border-2 transition-all duration-200 hover:shadow-md ${
+              className={`modern-card p-4 transition-all duration-300 hover:scale-105 ${
                 getStatusColors(level, service.color)
               }`}
             >
-              <div className="flex flex-col items-center text-center space-y-2">
-                <div className="flex items-center justify-center">
-                  <span className="text-xl">{service.icon}</span>
+              <div className="flex flex-col items-center text-center space-y-3">
+                <div className="w-12 h-12 bg-white bg-opacity-50 rounded-xl flex items-center justify-center shadow-sm">
+                  <span className="text-2xl">{service.icon}</span>
                 </div>
-                <h3 className="font-semibold text-sm">{service.name}</h3>
-                <span className={`px-2 py-1 text-xs font-medium rounded-full ${getStatusBadgeColor(level)}`}>
+                <h3 className="font-bold text-base">{service.name}</h3>
+                <span className={`px-3 py-1.5 text-sm font-semibold rounded-full shadow-sm ${getStatusBadgeColor(level)}`}>
                   {statusText}
                 </span>
-                <div className="text-xs opacity-80">
+                <div className="text-sm font-medium opacity-90">
                   {service.count === 0 ? (
-                    'Sin reportes'
+                    '✅ Sin reportes'
                   ) : (
-                    `${service.count} reporte${service.count > 1 ? 's' : ''}`
+                    `⚠️ ${service.count} reporte${service.count > 1 ? 's' : ''}`
                   )}
                 </div>
               </div>
@@ -128,8 +133,10 @@ const ServiceStatus = ({ reports }) => {
         })}
       </div>
       
-      <div className="mt-3 text-xs text-gray-500 text-center">
-        Estados basados en reportes de las últimas 24 horas
+      <div className="mt-4 p-3 bg-gray-50 rounded-lg border border-gray-200">
+        <div className="text-sm text-gray-600 text-center font-medium">
+          📊 Datos actualizados cada minuto • Últimas 24 horas
+        </div>
       </div>
     </div>
   );

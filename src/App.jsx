@@ -309,36 +309,47 @@ function App() {
 
   console.log('App: Rendering main application state');
   return (
-    <div className="min-h-screen bg-gradient-to-br from-red-50 to-gray-100">
-      <header className="bg-gradient-to-r from-red-600 to-red-700 shadow-lg">
+    <div className="min-h-screen gradient-bg">
+      <header className="glass-card border-b border-white/20 sticky top-0 z-50">
         <div className="w-full px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center py-6">
-            <div className="flex items-center">
-              <h1 className="text-3xl font-bold text-white">
-                Reportes CR 🇨🇷
-              </h1>
-              <span className="ml-4 px-3 py-1 bg-white bg-opacity-20 text-white text-sm rounded-full">
-                v1.0
+            <div className="flex items-center space-x-4">
+              <div className="w-14 h-14 bg-gradient-to-br from-red-600 to-red-700 rounded-2xl flex items-center justify-center shadow-xl">
+                <span className="text-white font-bold text-2xl">🇨🇷</span>
+              </div>
+              <div>
+                <h1 className="text-3xl font-bold bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent">
+                  ReportesCR
+                </h1>
+                <p className="text-gray-600 font-medium text-sm">Sistema Nacional de Reportes</p>
+              </div>
+              <span className="ml-4 px-3 py-1 bg-gradient-to-r from-red-100 to-red-50 text-red-700 text-xs font-semibold rounded-full border border-red-200">
+                BETA v1.0
               </span>
             </div>
             <div className="flex items-center space-x-4">
               {user ? (
                 <>
-                  <div className="flex items-center space-x-2">
+                  <div className="flex items-center space-x-3 bg-white/10 backdrop-blur-sm rounded-xl px-4 py-2 border border-white/20">
                     {user.photoURL && (
                       <img 
                         src={user.photoURL} 
                         alt="Foto de perfil"
-                        className="w-8 h-8 rounded-full border-2 border-white border-opacity-30"
+                        className="w-10 h-10 rounded-full border-2 border-white/30 shadow-md"
                       />
                     )}
-                    <span className="text-red-100">
-                      {user.displayName || user.email}
-                    </span>
+                    <div>
+                      <span className="text-gray-800 font-semibold text-sm block">
+                        {user.displayName || 'Usuario'}
+                      </span>
+                      <span className="text-gray-600 text-xs">
+                        {user.email}
+                      </span>
+                    </div>
                   </div>
                   <button
                     onClick={handleLogout}
-                    className="bg-white bg-opacity-20 text-white py-2 px-4 rounded-md hover:bg-opacity-30 transition duration-200"
+                    className="bg-red-600 hover:bg-red-700 text-white py-2.5 px-5 rounded-xl font-semibold transition-all duration-200 shadow-lg hover:shadow-xl hover:scale-105"
                   >
                     Cerrar Sesión
                   </button>
@@ -346,7 +357,7 @@ function App() {
               ) : (
                 <button
                   onClick={handleLogin}
-                  className="bg-white bg-opacity-20 text-white py-2 px-4 rounded-md hover:bg-opacity-30 transition duration-200 flex items-center space-x-2"
+                  className="btn-primary flex items-center space-x-2 font-semibold"
                 >
                   <svg className="w-4 h-4" viewBox="0 0 24 24">
                     <path fill="currentColor" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
@@ -373,8 +384,8 @@ function App() {
           <div className="lg:col-span-3">
             
             {/* Mobile Tab Navigation */}
-            <div className="lg:hidden bg-white rounded-lg shadow-sm mb-6">
-              <nav className="flex">
+            <div className="lg:hidden modern-card mb-6 p-1">
+              <nav className="flex rounded-lg bg-gray-50">
                 {[
                   { key: 'map', label: 'Mapa', icon: '🗺️' },
                   { key: 'create', label: 'Crear', icon: '➕' },
@@ -383,10 +394,10 @@ function App() {
                   <button
                     key={tab.key}
                     onClick={() => setActiveTab(tab.key)}
-                    className={`flex-1 flex items-center justify-center py-3 text-xs font-medium ${
+                    className={`flex-1 flex items-center justify-center py-3 px-2 text-sm font-semibold rounded-md transition-all duration-200 ${
                       activeTab === tab.key
-                        ? 'text-red-600 border-b-2 border-red-600'
-                        : 'text-gray-500 hover:text-gray-700'
+                        ? 'bg-white text-red-600 shadow-md'
+                        : 'text-gray-600 hover:text-gray-800 hover:bg-white/50'
                     }`}
                   >
                     <span className="mr-1">{tab.icon}</span>
@@ -397,7 +408,7 @@ function App() {
             </div>
 
             {/* Map View */}
-            <div className={`rounded-xl shadow-xl overflow-hidden ${activeTab !== 'map' ? 'hidden lg:block' : ''}`}>
+            <div className={`modern-card overflow-hidden ${activeTab !== 'map' ? 'hidden lg:block' : ''}`}>
               {userLocation ? (
                 <MapView 
                   reports={reports} 
@@ -457,7 +468,7 @@ function App() {
             </div>
 
             {/* Reports List - Shown below map on mobile only */}
-            <div className={`rounded-xl shadow-xl mt-6 ${activeTab === 'map' ? 'lg:hidden' : 'hidden'}`}>
+            <div className={`modern-card mt-6 ${activeTab === 'map' ? 'lg:hidden' : 'hidden'}`}>
               <ReportList 
                 reports={reports} 
                 user={user} 
@@ -465,7 +476,7 @@ function App() {
             </div>
 
             {/* Reports List - Desktop version in original position */}
-            <div className="hidden lg:block rounded-xl shadow-xl mt-6">
+            <div className="hidden lg:block modern-card mt-6">
               <ReportList 
                 reports={reports} 
                 user={user} 
@@ -476,17 +487,17 @@ function App() {
             {user && (
               <div className="hidden lg:grid lg:grid-cols-2 gap-6 mt-6">
                 {/* Stats */}
-                <div className="bg-white rounded-xl shadow-xl p-6">
-                  <h3 className="text-lg font-bold text-gray-800 mb-4 flex items-center">
-                    <span className="mr-2">📊</span>
+                <div className="modern-card p-6">
+                  <h3 className="heading-secondary mb-6 flex items-center">
+                    <span className="mr-3 w-8 h-8 bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg flex items-center justify-center text-white text-sm">📊</span>
                     Estado del Sistema
                   </h3>
                   <div className="space-y-4">
-                    <div className="bg-red-50 p-3 rounded-lg flex justify-between items-center">
-                      <span className="text-gray-700 font-medium">Total reportes:</span>
-                      <span className="text-red-600 font-bold text-lg">{reports.length}</span>
+                    <div className="bg-gradient-to-r from-red-50 to-red-100 p-4 rounded-xl flex justify-between items-center border-l-4 border-red-500">
+                      <span className="text-gray-700 font-semibold">Total reportes</span>
+                      <span className="text-red-600 font-bold text-xl">{reports.length}</span>
                     </div>
-                    <div className="bg-green-50 p-3 rounded-lg flex justify-between items-center">
+                    <div className="bg-gradient-to-r from-green-50 to-green-100 p-4 rounded-xl flex justify-between items-center border-l-4 border-green-500">
                       <span className="text-gray-700 font-medium">Tu ubicación:</span>
                       <span className={`font-bold ${userLocation ? 'text-green-600' : 'text-red-600'}`}>
                         {userLocation ? '📍 Detectada' : '❌ No disponible'}
@@ -651,27 +662,32 @@ function App() {
                   }}
                 />
               ) : (
-                <div className="bg-white rounded-xl shadow-xl p-6">
-                  <h3 className="text-lg font-bold text-gray-800 mb-4 flex items-center">
-                    <span className="mr-2">➕</span>
+                <div className="modern-card p-6">
+                  <h3 className="heading-secondary mb-6 flex items-center">
+                    <span className="mr-3 w-8 h-8 bg-gradient-to-br from-red-500 to-red-600 rounded-lg flex items-center justify-center text-white text-sm">➕</span>
                     Crear Reporte
                   </h3>
                   <div className="text-center py-8">
-                    <div className="text-gray-400 text-4xl mb-4">🔒</div>
-                    <p className="text-gray-600 mb-4">
-                      Inicia sesión para crear nuevos reportes
+                    <div className="w-16 h-16 bg-gradient-to-br from-gray-100 to-gray-200 rounded-2xl flex items-center justify-center mx-auto mb-6">
+                      <span className="text-2xl">�</span>
+                    </div>
+                    <h4 className="text-lg font-semibold text-gray-800 mb-2">
+                      Acceso Requerido
+                    </h4>
+                    <p className="text-gray-600 mb-6 text-sm leading-relaxed">
+                      Inicia sesión con tu cuenta de Google para crear reportes y ayudar a tu comunidad
                     </p>
                     <button
                       onClick={handleLogin}
-                      className="bg-red-600 text-white py-2 px-4 rounded-md hover:bg-red-700 transition duration-200 flex items-center justify-center mx-auto space-x-2"
+                      className="btn-primary w-full"
                     >
-                      <svg className="w-4 h-4" viewBox="0 0 24 24">
+                      <svg className="w-5 h-5 mr-2" viewBox="0 0 24 24">
                         <path fill="currentColor" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
                         <path fill="currentColor" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
                         <path fill="currentColor" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
                         <path fill="currentColor" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
                       </svg>
-                      <span>Iniciar Sesión</span>
+                      <span>Iniciar Sesión con Google</span>
                     </button>
                   </div>
                 </div>
@@ -682,25 +698,25 @@ function App() {
             
             {/* Stats - Desktop only, in sidebar when NOT logged in */}
             {!user && (
-              <div className="hidden lg:block bg-white rounded-xl shadow-xl p-6">
-                <h3 className="text-lg font-bold text-gray-800 mb-4 flex items-center">
-                  <span className="mr-2">📊</span>
+              <div className="hidden lg:block modern-card p-6">
+                <h3 className="heading-secondary mb-6 flex items-center">
+                  <span className="mr-3 w-8 h-8 bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg flex items-center justify-center text-white text-sm">📊</span>
                   Estado del Sistema
                 </h3>
                 <div className="space-y-4">
-                  <div className="bg-red-50 p-3 rounded-lg flex justify-between items-center">
-                    <span className="text-gray-700 font-medium">Total reportes:</span>
-                    <span className="text-red-600 font-bold text-lg">{reports.length}</span>
+                  <div className="bg-gradient-to-r from-red-50 to-red-100 p-4 rounded-xl flex justify-between items-center border-l-4 border-red-500">
+                    <span className="text-gray-700 font-semibold">Total reportes</span>
+                    <span className="text-red-600 font-bold text-xl">{reports.length}</span>
                   </div>
-                  <div className="bg-green-50 p-3 rounded-lg flex justify-between items-center">
-                    <span className="text-gray-700 font-medium">Tu ubicación:</span>
+                  <div className="bg-gradient-to-r from-green-50 to-green-100 p-4 rounded-xl flex justify-between items-center border-l-4 border-green-500">
+                    <span className="text-gray-700 font-semibold">Tu ubicación</span>
                     <span className={`font-bold ${userLocation ? 'text-green-600' : 'text-red-600'}`}>
                       {userLocation ? '📍 Detectada' : '❌ No disponible'}
                     </span>
                   </div>
-                  <div className="bg-emerald-50 p-3 rounded-lg flex justify-between items-center">
-                    <span className="text-gray-700 font-medium">Estado:</span>
-                    <span className="font-bold text-emerald-600">✅ En línea</span>
+                  <div className="bg-gradient-to-r from-emerald-50 to-emerald-100 p-4 rounded-xl flex justify-between items-center border-l-4 border-emerald-500">
+                    <span className="text-gray-700 font-semibold">Estado del servicio</span>
+                    <span className="font-bold text-emerald-600 status-online px-2 py-1 rounded-lg">✅ En línea</span>
                   </div>
                 </div>
               </div>
@@ -708,37 +724,41 @@ function App() {
 
             {/* Map Legend - Desktop only, in sidebar when NOT logged in */}
             {!user && (
-              <div className="hidden lg:block bg-white rounded-xl shadow-xl p-6">
-                <h3 className="text-lg font-bold text-gray-800 mb-4 flex items-center">
-                  <span className="mr-2">🗺️</span>
+              <div className="hidden lg:block modern-card p-6">
+                <h3 className="heading-secondary mb-6 flex items-center">
+                  <span className="mr-3 w-8 h-8 bg-gradient-to-br from-indigo-500 to-indigo-600 rounded-lg flex items-center justify-center text-white text-sm">🗺️</span>
                   Leyenda del Mapa
                 </h3>
-                <div className="space-y-3">
-                  <div className="text-xs text-gray-600 mb-3">
-                    <strong>Áreas Afectadas:</strong> Los círculos muestran las zonas con problemas reportados
+                <div className="space-y-4">
+                  <div className="bg-gradient-to-r from-gray-50 to-gray-100 p-3 rounded-lg border-l-4 border-gray-400">
+                    <p className="text-sm text-gray-700 font-medium">
+                      <strong>Áreas Afectadas:</strong> Los círculos muestran zonas con problemas reportados
+                    </p>
                   </div>
                   
-                  <div className="space-y-2">
-                    <div className="flex items-center space-x-3">
-                      <div className="w-4 h-4 rounded-full border-2 border-red-600 bg-red-600 bg-opacity-10"></div>
-                      <span className="text-sm text-gray-700">Electricidad</span>
+                  <div className="space-y-3">
+                    <div className="flex items-center space-x-3 p-2 service-electricidad rounded-lg">
+                      <div className="w-5 h-5 rounded-full border-2 border-red-600 bg-red-600 bg-opacity-20 flex-shrink-0"></div>
+                      <span className="text-sm font-medium text-gray-800">Electricidad</span>
                     </div>
-                    <div className="flex items-center space-x-3">
-                      <div className="w-4 h-4 rounded-full border-2 border-blue-600 bg-blue-600 bg-opacity-10"></div>
-                      <span className="text-sm text-gray-700">Agua</span>
+                    <div className="flex items-center space-x-3 p-2 service-agua rounded-lg">
+                      <div className="w-5 h-5 rounded-full border-2 border-blue-600 bg-blue-600 bg-opacity-20 flex-shrink-0"></div>
+                      <span className="text-sm font-medium text-gray-800">Agua</span>
                     </div>
-                    <div className="flex items-center space-x-3">
-                      <div className="w-4 h-4 rounded-full border-2 border-green-600 bg-green-600 bg-opacity-10"></div>
-                      <span className="text-sm text-gray-700">Internet</span>
+                    <div className="flex items-center space-x-3 p-2 service-internet rounded-lg">
+                      <div className="w-5 h-5 rounded-full border-2 border-green-600 bg-green-600 bg-opacity-20 flex-shrink-0"></div>
+                      <span className="text-sm font-medium text-gray-800">Internet</span>
                     </div>
-                    <div className="flex items-center space-x-3">
-                      <div className="w-4 h-4 rounded-full border-2 border-orange-600 bg-orange-600 bg-opacity-10"></div>
-                      <span className="text-sm text-gray-700">Otros servicios</span>
+                    <div className="flex items-center space-x-3 p-2 service-otros rounded-lg">
+                      <div className="w-5 h-5 rounded-full border-2 border-purple-600 bg-purple-600 bg-opacity-20 flex-shrink-0"></div>
+                      <span className="text-sm font-medium text-gray-800">Otros servicios</span>
                     </div>
                   </div>
                   
-                  <div className="text-xs text-gray-500 mt-3 pt-3 border-t">
-                    💡 Cada círculo representa un área de ~500m de radio donde podría haber afectaciones
+                  <div className="bg-blue-50 p-3 rounded-lg border border-blue-200">
+                    <div className="text-xs text-blue-800">
+                      <strong>💡 Consejo:</strong> Cada círculo representa un radio de ~500m donde podría haber afectaciones.
+                    </div>
                   </div>
                 </div>
               </div>
