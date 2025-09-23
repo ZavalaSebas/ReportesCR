@@ -77,10 +77,10 @@ const NearbyReports = ({ reports, userLocation, user }) => {
       }
     });
 
-    // Sort by distance (closest first) and take top 5
+    // Sort by distance (closest first) and take top 3
     return nearby
       .sort((a, b) => a.distance - b.distance)
-      .slice(0, 5);
+      .slice(0, 3);
   };
 
   const nearbyReports = getNearbyReports();
