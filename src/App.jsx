@@ -13,6 +13,8 @@ function App() {
   const [reports, setReports] = useState([]);
   const [userLocation, setUserLocation] = useState(null);
   const [activeTab, setActiveTab] = useState('map');
+  const [isLocationSelectionMode, setIsLocationSelectionMode] = useState(false);
+  const [selectedLocationForReport, setSelectedLocationForReport] = useState(null);
 
   useEffect(() => {
     console.log('App component mounted/updated', {
@@ -247,6 +249,21 @@ function App() {
                 <MapView 
                   reports={reports} 
                   userLocation={userLocation} 
+                  isLocationSelectionMode={isLocationSelectionMode}
+                  selectedLocation={selectedLocationForReport}
+                  onLocationSelect={(location) => {
+                    console.log('🟢 Location selected from map:', location);
+                    if (location === 'EXIT_SELECTION_MODE') {
+                      // Exit selection mode
+                      setIsLocationSelectionMode(false);
+                      setActiveTab('create');
+                      console.log('🟢 Exiting selection mode, returning to form');
+                    } else {
+                      // Update location but stay in selection mode
+                      setSelectedLocationForReport(location);
+                      console.log('🟢 Location updated, staying in selection mode');
+                    }
+                  }}
                 />
               ) : (
                 <div className="h-96 bg-gray-200 flex items-center justify-center">
@@ -338,8 +355,18 @@ function App() {
               {user ? (
                 <ReportForm 
                   user={user} 
+                  selectedLocationForReport={selectedLocationForReport}
+                  onRequestLocationSelection={() => {
+                    console.log('🔴 Button clicked - Activating location selection mode');
+                    setIsLocationSelectionMode(true);
+                    setActiveTab('map');
+                    console.log('🔴 State set - isLocationSelectionMode: true, activeTab: map');
+                  }}
                   onReportCreated={() => {
                     console.log('Report created successfully, refreshing view...');
+                    // Reset location selection state
+                    setSelectedLocationForReport(null);
+                    setIsLocationSelectionMode(false);
                     // Switch to map view on mobile after creating report
                     if (window.innerWidth < 1024) {
                       setActiveTab('map');

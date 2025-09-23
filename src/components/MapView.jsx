@@ -1,5 +1,5 @@
 import React from 'react';
-import { MapContainer, TileLayer, Marker, Popup, Circle } from 'react-leaflet';
+import { MapContainer, TileLayer, Marker, Popup, Circle, useMapEvents } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 
@@ -69,7 +69,48 @@ const circleStyles = {
   }
 };
 
-const MapView = ({ reports, userLocation }) => {
+// Component to handle map clicks for location selection
+const MapClickHandler = ({ isLocationSelectionMode, onLocationSelect }) => {
+  useMapEvents({
+    click(e) {
+      console.log('🖱️ Map clicked - Selection mode:', isLocationSelectionMode);
+      if (isLocationSelectionMode && onLocationSelect) {
+        const { lat, lng } = e.latlng;
+        console.log('📍 Calling onLocationSelect with:', { latitude: lat, longitude: lng });
+        onLocationSelect({
+          latitude: lat,
+          longitude: lng
+        });
+      }
+    },
+  });
+  return null;
+};
+
+// Custom icon for selected location (larger and different color)
+const selectedLocationIcon = new L.Icon({
+  iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-violet.png',
+  shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
+  iconSize: [32, 52],
+  iconAnchor: [16, 52],
+  popupAnchor: [1, -44],
+  shadowSize: [52, 52]
+});
+
+const MapView = ({ 
+  reports, 
+  userLocation, 
+  isLocationSelectionMode = false, 
+  onLocationSelect = null,
+  selectedLocation = null 
+}) => {
+  // Debug logging
+  console.log('🗺️ MapView props:', { 
+    isLocationSelectionMode, 
+    hasOnLocationSelect: !!onLocationSelect,
+    selectedLocation 
+  });
+
   // Default center to Costa Rica coordinates
   const center = userLocation || [9.7489, -83.7534];
 
@@ -83,15 +124,45 @@ const MapView = ({ reports, userLocation }) => {
   }
 
   return (
-    <div className="w-full h-64 md:h-96 lg:h-[500px] rounded-lg overflow-hidden shadow-lg">
+    <div className="w-full h-64 md:h-96 lg:h-[500px] rounded-lg overflow-hidden shadow-lg relative">
+      {/* Selection mode indicator */}
+      {isLocationSelectionMode && (
+        <div className="absolute top-4 left-4 right-4 z-[1000] bg-purple-600 text-white px-4 py-2 rounded-lg shadow-lg">
+          <div className="flex items-center justify-between">
+            <span className="text-sm font-medium">📍 Haz clic donde quieras marcar la ubicación</span>
+            <button
+              onClick={() => {
+                console.log('✅ Exiting selection mode');
+                if (onLocationSelect) {
+                  // Signal to exit selection mode
+                  onLocationSelect('EXIT_SELECTION_MODE');
+                }
+              }}
+              className="bg-purple-700 hover:bg-purple-800 px-3 py-1 rounded text-xs font-medium transition-colors ml-4"
+            >
+              ✓ Listo
+            </button>
+          </div>
+        </div>
+      )}
+      
       <MapContainer
         center={center}
         zoom={userLocation ? 13 : 8}
         className="w-full h-full"
+        style={{ 
+          cursor: isLocationSelectionMode ? 'crosshair' : 'grab'
+        }}
       >
         <TileLayer
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+        />
+        
+        {/* Map click handler for location selection */}
+        <MapClickHandler 
+          isLocationSelectionMode={isLocationSelectionMode}
+          onLocationSelect={onLocationSelect}
         />
         
         {/* User location marker */}
@@ -100,6 +171,24 @@ const MapView = ({ reports, userLocation }) => {
             <Popup>
               <div className="text-center">
                 <strong>Tu ubicación</strong>
+              </div>
+            </Popup>
+          </Marker>
+        )}
+
+        {/* Selected location marker (for location selection mode) */}
+        {isLocationSelectionMode && selectedLocation && (
+          <Marker 
+            position={[selectedLocation.latitude, selectedLocation.longitude]}
+            icon={selectedLocationIcon}
+          >
+            <Popup>
+              <div className="text-center">
+                <strong>📍 Ubicación seleccionada</strong>
+                <br />
+                <small>Lat: {selectedLocation.latitude.toFixed(6)}</small>
+                <br />
+                <small>Lng: {selectedLocation.longitude.toFixed(6)}</small>
               </div>
             </Popup>
           </Marker>

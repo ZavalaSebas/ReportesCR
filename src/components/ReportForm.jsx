@@ -25,49 +25,70 @@ const MapClickHandler = ({ onLocationSelect }) => {
   return null;
 };
 
-// Function to get location name from coordinates (simplified for now)
+// Function to get location name from coordinates
 const getLocationName = async (latitude, longitude) => {
   try {
-    // For now, just return coordinates since CORS is blocking the API
+    // Try with multiple APIs
+    
+    // Option 1: Try BigDataCloud (no API key required, CORS friendly)
+    try {
+      const response = await fetch(
+        `https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${latitude}&longitude=${longitude}&localityLanguage=es`
+      );
+      
+      if (response.ok) {
+        const data = await response.json();
+        console.log('🌍 BigDataCloud response:', data);
+        
+        if (data && (data.locality || data.city || data.countryName)) {
+          const parts = [];
+          
+          if (data.locality) parts.push(data.locality);
+          if (data.city && data.city !== data.locality) parts.push(data.city);
+          if (data.principalSubdivision) parts.push(data.principalSubdivision);
+          if (data.countryName) parts.push(data.countryName);
+          
+          const formattedName = parts.length > 0 ? parts.join(', ') : data.localityInfo?.administrative?.[0]?.name || 'Ubicación encontrada';
+          console.log('✅ Location name from BigDataCloud:', formattedName);
+          return formattedName;
+        }
+      }
+    } catch (error) {
+      console.warn('BigDataCloud API failed:', error);
+    }
+    
+    // Option 2: Try Nominatim as fallback
+    try {
+      const response = await fetch(
+        `https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}&zoom=18&addressdetails=1&accept-language=es`
+      );
+      
+      if (response.ok) {
+        const data = await response.json();
+        console.log('🗺️ Nominatim response:', data);
+        
+        if (data && data.display_name) {
+          const address = data.address || {};
+          const parts = [];
+          
+          if (address.road) parts.push(address.road);
+          if (address.neighbourhood || address.suburb) parts.push(address.neighbourhood || address.suburb);
+          if (address.city || address.town || address.village) parts.push(address.city || address.town || address.village);
+          if (address.state) parts.push(address.state);
+          
+          const formattedName = parts.length > 0 ? parts.join(', ') : data.display_name;
+          console.log('✅ Location name from Nominatim:', formattedName);
+          return formattedName;
+        }
+      }
+    } catch (error) {
+      console.warn('Nominatim API failed:', error);
+    }
+    
+    // Fallback to coordinates if all APIs fail
+    console.warn('⚠️ All geocoding APIs failed, using coordinates');
     return `Lat: ${latitude.toFixed(4)}, Lng: ${longitude.toFixed(4)}`;
     
-    /* Original implementation with CORS issues:
-    const response = await fetch(
-      `https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}&zoom=18&addressdetails=1&accept-language=es`
-    );
-    const data = await response.json();
-    
-    if (data && data.display_name) {
-      // Extract relevant parts of the address
-      const address = data.address || {};
-      const parts = [];
-      
-      // Add road/street name
-      if (address.road) {
-        parts.push(address.road);
-      }
-      
-      // Add neighborhood or suburb
-      if (address.neighbourhood || address.suburb) {
-        parts.push(address.neighbourhood || address.suburb);
-      }
-      
-      // Add city/town
-      if (address.city || address.town || address.village) {
-        parts.push(address.city || address.town || address.village);
-      }
-      
-      // Add state/province
-      if (address.state) {
-        parts.push(address.state);
-      }
-      
-      // Return formatted address or full display name as fallback
-      return parts.length > 0 ? parts.join(', ') : data.display_name;
-    }
-    */
-    
-    return null;
   } catch (error) {
     console.error('Error getting location name:', error);
     return `Lat: ${latitude.toFixed(4)}, Lng: ${longitude.toFixed(4)}`;
@@ -88,7 +109,7 @@ const providers = {
   otros: ['Otro']
 };
 
-const ReportForm = ({ user, onReportCreated }) => {
+const ReportForm = ({ user, onReportCreated, selectedLocationForReport, onRequestLocationSelection }) => {
   const [formData, setFormData] = useState({
     title: '',
     serviceType: '',
@@ -104,6 +125,28 @@ const ReportForm = ({ user, onReportCreated }) => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
+
+  // Handle location selected from main map
+  useEffect(() => {
+    if (selectedLocationForReport) {
+      console.log('🔄 Processing location from main map:', selectedLocationForReport);
+      setSelectedLocation(selectedLocationForReport);
+      setLoadingLocationName(true);
+      
+      getLocationName(selectedLocationForReport.latitude, selectedLocationForReport.longitude)
+        .then(locationName => {
+          console.log('📍 Location name obtained:', locationName);
+          setSelectedLocationName(locationName || 'Ubicación seleccionada desde mapa');
+        })
+        .catch(error => {
+          console.error('Error getting location name:', error);
+          setSelectedLocationName('Ubicación seleccionada desde mapa');
+        })
+        .finally(() => {
+          setLoadingLocationName(false);
+        });
+    }
+  }, [selectedLocationForReport]);
 
   useEffect(() => {
     // Get user location
@@ -404,17 +447,31 @@ const ReportForm = ({ user, onReportCreated }) => {
                 <div className="text-sm font-medium text-gray-700">
                   {selectedLocation ? 'Ubicación seleccionada:' : 'Ubicación detectada:'}
                 </div>
-                <button
-                  type="button"
-                  onClick={() => setShowMapSelector(!showMapSelector)}
-                  className={`text-sm px-3 py-1 rounded transition-colors ${
-                    showMapSelector 
-                      ? 'bg-red-100 text-red-700 hover:bg-red-200' 
-                      : 'bg-blue-100 text-blue-700 hover:bg-blue-200'
-                  }`}
-                >
-                  {showMapSelector ? '📋 Ocultar mapa' : '🗺️ Ajustar en mapa'}
-                </button>
+                <div className="flex space-x-2">
+                  {onRequestLocationSelection && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        console.log('🔴 ReportForm button clicked - calling onRequestLocationSelection');
+                        onRequestLocationSelection();
+                      }}
+                      className="text-sm px-3 py-1 rounded bg-red-100 text-red-700 hover:bg-red-200 transition-colors"
+                    >
+                      🗺️ Marcar en mapa
+                    </button>
+                  )}
+                  <button
+                    type="button"
+                    onClick={() => setShowMapSelector(!showMapSelector)}
+                    className={`text-sm px-3 py-1 rounded transition-colors ${
+                      showMapSelector 
+                        ? 'bg-blue-100 text-blue-700 hover:bg-blue-200' 
+                        : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                    }`}
+                  >
+                    {showMapSelector ? '📋 Ocultar mapa local' : '� Ajustar aquí'}
+                  </button>
+                </div>
               </div>
               
               {/* Location name */}
@@ -523,7 +580,7 @@ const ReportForm = ({ user, onReportCreated }) => {
             )}
 
             <div className="text-xs text-gray-500">
-              💡 <strong>Tip:</strong> Para mayor precisión, ajusta la ubicación en el mapa haciendo clic exactamente donde está ocurriendo la falla
+              💡 <strong>Tip:</strong> Usa <strong>"Marcar en mapa"</strong> para seleccionar directamente en el mapa principal, o <strong>"Ajustar aquí"</strong> para usar el mapa local
             </div>
           </div>
         </div>
